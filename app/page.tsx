@@ -3,6 +3,23 @@ import React, { useState, useRef, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 
 const EMAIL_STORAGE_KEY = "uxrival_email";
+const WATCHLIST_STORAGE_KEY = "uxrival_watchlist";
+
+type WatchlistItem = { id: string; category: string; competitors: string; depth: string; email: string; frequency: string; savedAt: string };
+
+function loadWatchlist(): WatchlistItem[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(WATCHLIST_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveWatchlist(items: WatchlistItem[]) {
+  if (typeof window !== "undefined") localStorage.setItem(WATCHLIST_STORAGE_KEY, JSON.stringify(items));
+}
 const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap');`;
 
 const INDUSTRIES = [
@@ -270,6 +287,9 @@ const styles = `
   .heatmap-header { font-family: var(--font-m); font-size: 10px; color: var(--text-muted); background: var(--surface2); padding: 10px 12px; display: flex; align-items: center; justify-content: center; text-align: center; }
   .comp-th.you-col, td.you-col { background: var(--accent-dim) !important; }
   .you-badge { font-family: var(--font-m); font-size: 8px; color: var(--accent); background: rgba(232,255,71,0.15); border: 1px solid rgba(232,255,71,0.3); padding: 2px 6px; border-radius: 10px; margin-left: 6px; }
+  .watch-form-inline { padding: 16px 20px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); margin: 0 24px 16px; }
+  .nav-badge { background: var(--accent); color: #090909; font-family: var(--font-m); font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 10px; margin-left: 6px; }
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--surface); border: 1px solid var(--accent); color: var(--text); padding: 12px 20px; border-radius: var(--radius); font-size: 14px; z-index: 2000; box-shadow: 0 4px 24px rgba(0,0,0,0.4); }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   .fade-up { animation: fadeUp 0.4s ease; }
   @media (max-width: 860px) { .hero-split { grid-template-columns: 1fr; gap: 36px; } .hero-right { position: static; } }
@@ -501,8 +521,68 @@ export default function UXRival() {
   const [reportViewMode, setReportViewMode] = useState<"table" | "heatmap">("table");
   const [analysisMode, setAnalysisMode] = useState<"competitor" | "myProduct">("competitor");
   const [myProduct, setMyProduct] = useState("");
+  const [showWatchForm, setShowWatchForm] = useState(false);
+  const [watchEmail, setWatchEmail] = useState("");
+  const [watchFrequency, setWatchFrequency] = useState<"Weekly" | "Monthly">("Weekly");
+  const [showWatchlistModal, setShowWatchlistModal] = useState(false);
+  const [watchlist, setWatchlist] = useState<WatchlistItem[]>([]);
+  const [toastMsg, setToastMsg] = useState("");
+  const [sendNowId, setSendNowId] = useState<string | null>(null);
   const effectiveCategory = industry === "custom" ? customCategory : industry;
   const canSubmit = !loading && (industry === "custom" ? customCategory.trim().length > 0 : industry.length > 0) && (analysisMode !== "myProduct" || myProduct.trim().length > 0);
+
+  useEffect(() => {
+    setWatchlist(loadWatchlist());
+  }, []);
+
+  useEffect(() => {
+    if (showWatchForm && typeof window !== "undefined") {
+      setWatchEmail(localStorage.getItem(EMAIL_STORAGE_KEY) || "");
+    }
+  }, [showWatchForm]);
+
+  const handleStartWatching = () => {
+    const email = watchEmail.trim();
+    if (!email) return;
+    const item: WatchlistItem = {
+      id: crypto.randomUUID(),
+      category: effectiveCategory,
+      competitors,
+      depth,
+      email,
+      frequency: watchFrequency,
+      savedAt: new Date().toISOString(),
+    };
+    const next = [...watchlist, item];
+    setWatchlist(next);
+    saveWatchlist(next);
+    setShowWatchForm(false);
+    setToastMsg("Watching this space ✓ — we'll email you updates");
+    setTimeout(() => setToastMsg(""), 3000);
+  };
+
+  const handleRemoveWatchlist = (id: string) => {
+    const next = watchlist.filter((w) => w.id !== id);
+    setWatchlist(next);
+    saveWatchlist(next);
+  };
+
+  const handleSendNow = async (item: WatchlistItem) => {
+    setSendNowId(item.id);
+    try {
+      const res = await fetch("/api/watchlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: item.email, category: item.category, competitors: item.competitors, depth: item.depth, frequency: item.frequency }),
+      });
+      const data = await res.json();
+      if (data.success) setToastMsg("Report sent ✓");
+      else setToastMsg("Failed to send");
+    } catch {
+      setToastMsg("Failed to send");
+    }
+    setTimeout(() => { setToastMsg(""); setSendNowId(null); }, 3000);
+  };
 
   useEffect(() => {
     const reportParam = searchParams.get("report");
@@ -580,11 +660,12 @@ export default function UXRival() {
             <div className="nav-logo">UX<span>Rival</span></div>
             <span className="nav-pill">BETA</span>
           </div>
-          <div className="nav-right">
+            <div className="nav-right">
             <div className="nav-links">
               <span className="nav-link" onClick={scrollToLearn}>Features</span>
               <span className="nav-link" onClick={scrollToLearn}>How it works</span>
               <span className="nav-link" onClick={scrollToLearn}>Who it&apos;s for</span>
+              <span className="nav-link" onClick={() => setShowWatchlistModal(true)} style={{ display: "flex", alignItems: "center" }}>Watchlist{watchlist.length > 0 && <span className="nav-badge">{watchlist.length}</span>}</span>
             </div>
             <button type="button" className="btn-primary" onClick={scrollToForm}>Get Started Free →</button>
           </div>
@@ -690,10 +771,27 @@ export default function UXRival() {
                 {reportViewMode === "table" ? <ReportTable data={reportData} myProduct={analysisMode === "myProduct" ? myProduct : undefined} /> : <HeatmapView data={reportData} myProduct={analysisMode === "myProduct" ? myProduct : undefined} />}
                 <div className="form-hint" style={{ marginTop: 32, textAlign: "center" }}>Generated by UXRival.com — Free AI UX Analysis</div>
               </div>
+              {showWatchForm && (
+                <div className="watch-form-inline">
+                  <div className="form-row">
+                    <span className="field-label">Email</span>
+                    <input type="email" placeholder="you@company.com" value={watchEmail} onChange={(e) => setWatchEmail(e.target.value)} style={{ width: "100%" }} />
+                  </div>
+                  <div className="form-row" style={{ marginBottom: 16 }}>
+                    <span className="field-label">Frequency</span>
+                    <div className="view-toggle" style={{ marginBottom: 0 }}>
+                      <button type="button" className={`view-toggle-btn${watchFrequency === "Weekly" ? " active" : ""}`} onClick={() => setWatchFrequency("Weekly")}>Weekly</button>
+                      <button type="button" className={`view-toggle-btn${watchFrequency === "Monthly" ? " active" : ""}`} onClick={() => setWatchFrequency("Monthly")}>Monthly</button>
+                    </div>
+                  </div>
+                  <button type="button" className="btn-primary" onClick={handleStartWatching} disabled={!watchEmail.trim()}>Start Watching →</button>
+                </div>
+              )}
               <div className="modal-actions">
                 <button type="button" className="btn-secondary" onClick={handleExportPdf}>Export as PDF</button>
                 <button type="button" className="btn-secondary" onClick={handleShareReport}>{shared ? "✓ Link Copied" : "Share Report"}</button>
                 <button type="button" className={`btn-secondary${copied ? " copied" : ""}`} onClick={handleCopy}>{copied ? "✓ Copied" : "Copy JSON"}</button>
+                <button type="button" className="btn-secondary" onClick={() => setShowWatchForm((s) => !s)}>👁 {showWatchForm ? "Cancel" : "Watch this space"}</button>
               </div>
             </div>
           </div>
@@ -747,6 +845,46 @@ export default function UXRival() {
           <div className="footer-copy">Built for designers who ship · Powered by Claude</div>
         </footer>
       </div>
+
+      {showWatchlistModal && (
+        <div className="modal-overlay" onClick={() => setShowWatchlistModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 560 }}>
+            <button type="button" className="modal-close" onClick={() => setShowWatchlistModal(false)} aria-label="Close">×</button>
+            <div className="modal-header">
+              <div className="report-title">Competitor Watchlist</div>
+            </div>
+            <div className="modal-scroll">
+              {watchlist.length === 0 ? (
+                <p className="form-hint" style={{ padding: 24 }}>No spaces watched yet. Run an analysis and click Watch this space.</p>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  {watchlist.map((item) => (
+                    <div key={item.id} className="feature-card" style={{ padding: 20 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, flexWrap: "wrap" }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div className="report-title" style={{ fontSize: 16, marginBottom: 6 }}>{item.category}</div>
+                          {item.competitors.trim() && <div className="form-hint" style={{ marginBottom: 6 }}>Competitors: {item.competitors.split(/[\n,]+/).map((s: string) => s.trim()).filter(Boolean).join(", ") || "—"}</div>}
+                          <div className="form-hint">→ {item.email} · {item.depth === "quick" ? "Quick" : "Deep"}</div>
+                          <div style={{ marginTop: 8, display: "flex", gap: 8, flexWrap: "wrap", alignItems: "center" }}>
+                            <span className="nav-pill" style={{ fontSize: 9 }}>{item.frequency}</span>
+                            <span className="form-hint" style={{ fontSize: 10 }}>Saved {new Date(item.savedAt).toLocaleDateString()}</span>
+                          </div>
+                        </div>
+                        <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+                          <button type="button" className="btn-secondary" onClick={() => handleSendNow(item)} disabled={sendNowId === item.id}>{sendNowId === item.id ? "Sending…" : "Send Now"}</button>
+                          <button type="button" className="btn-secondary" onClick={() => handleRemoveWatchlist(item.id)}>Remove</button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {toastMsg && <div className="toast">{toastMsg}</div>}
     </>
   );
 }
