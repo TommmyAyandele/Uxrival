@@ -1,6 +1,8 @@
 "use client";
-import { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 
+const EMAIL_STORAGE_KEY = "uxrival_email";
 const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap');`;
 
 const INDUSTRIES = [
@@ -359,6 +361,7 @@ function IndustryDropdown({ value, customValue, onChange, onCustomChange }: {
 }
 
 export default function UXRival() {
+  const searchParams = useSearchParams();
   const [industry, setIndustry] = useState("");
   const [customCategory, setCustomCategory] = useState("");
   const [competitors, setCompetitors] = useState("");
@@ -366,10 +369,29 @@ export default function UXRival() {
   const [depth, setDepth] = useState("quick");
   const [loading, setLoading] = useState(false);
   const [reportData, setReportData] = useState<any>(null);
+  const [pendingReportData, setPendingReportData] = useState<any>(null);
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [emailInput, setEmailInput] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [copied, setCopied] = useState(false);
+  const [shared, setShared] = useState(false);
   const effectiveCategory = industry === "custom" ? customCategory : industry;
   const canSubmit = !loading && (industry === "custom" ? customCategory.trim().length > 0 : industry.length > 0);
+
+  useEffect(() => {
+    const reportParam = searchParams.get("report");
+    if (reportParam) {
+      try {
+        const decoded = JSON.parse(atob(reportParam));
+        if (decoded && (decoded.secs || decoded.sum)) {
+          setReportData(decoded);
+          setShared(true);
+        }
+      } catch {
+        // ignore invalid report param
+      }
+    }
+  }, [searchParams]);
 
   const handleGenerate = async () => {
     if (!effectiveCategory.trim()) return;
@@ -384,13 +406,36 @@ export default function UXRival() {
       const { text: raw } = await res.json();
       const start = raw.indexOf("{"); const end = raw.lastIndexOf("}");
       if (start === -1 || end === -1) throw new Error(`No JSON found.`);
-      setReportData(JSON.parse(raw.slice(start, end + 1)));
+      const data = JSON.parse(raw.slice(start, end + 1));
+      if (typeof window !== "undefined" && localStorage.getItem(EMAIL_STORAGE_KEY)) {
+        setReportData(data);
+      } else {
+        setPendingReportData(data);
+        setShowEmailModal(true);
+      }
     } catch (err: any) {
       setErrorMsg(err.message || "Unknown error.");
     } finally { setLoading(false); }
   };
 
   const handleCopy = async () => { await navigator.clipboard.writeText(JSON.stringify(reportData, null, 2)); setCopied(true); setTimeout(() => setCopied(false), 2000); };
+  const handleShareReport = async () => {
+    const encoded = btoa(JSON.stringify(reportData));
+    const url = new URL(window.location.href);
+    url.searchParams.set("report", encoded);
+    await navigator.clipboard.writeText(url.toString());
+    setShared(true);
+    setTimeout(() => setShared(false), 2000);
+  };
+  const handleEmailSubmit = () => {
+    const email = emailInput.trim();
+    if (!email) return;
+    if (typeof window !== "undefined") localStorage.setItem(EMAIL_STORAGE_KEY, email);
+    setReportData(pendingReportData);
+    setPendingReportData(null);
+    setShowEmailModal(false);
+    setEmailInput("");
+  };
   const handleExportPdf = () => window.print();
   const scrollToLearn = () => document.getElementById("learn")?.scrollIntoView({ behavior: "smooth" });
   const scrollToForm = () => document.getElementById("form")?.scrollIntoView({ behavior: "smooth" });
@@ -464,6 +509,23 @@ export default function UXRival() {
 
         {loading && <div className="loading-state"><div className="loading-spinner" /><div className="loading-label"><span className="loading-dots">Analyzing UX patterns</span></div></div>}
         {errorMsg && !loading && <div className="error-state"><span className="error-icon">⚠</span><div><div className="error-title">Analysis failed</div><div className="error-msg">{errorMsg}</div></div></div>}
+        {showEmailModal && pendingReportData && (
+          <div className="modal-overlay">
+            <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 440 }}>
+              <div className="modal-header" style={{ padding: "24px 24px 0" }}>
+                <div className="report-title" style={{ marginBottom: 8 }}>Get your free report</div>
+                <p className="form-hint" style={{ marginBottom: 24 }}>Join 100+ designers getting UX insights</p>
+              </div>
+              <div style={{ padding: "0 24px 24px" }}>
+                <div className="form-row">
+                  <span className="field-label">Email</span>
+                  <input type="email" placeholder="you@company.com" value={emailInput} onChange={(e) => setEmailInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleEmailSubmit()} style={{ width: "100%", background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 10, color: "var(--text)", fontFamily: "var(--font-d)", fontSize: 15, padding: "13px 16px", outline: "none" }} />
+                </div>
+                <button type="button" className="btn-primary" onClick={handleEmailSubmit} disabled={!emailInput.trim()} style={{ width: "100%", marginTop: 8 }}>Get My Report →</button>
+              </div>
+            </div>
+          </div>
+        )}
         {reportData && !loading && (
           <div className="modal-overlay" onClick={() => setReportData(null)}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -472,16 +534,18 @@ export default function UXRival() {
                 <div className="report-header">
                   <div className="report-title-block">
                     <div className="report-label">// analysis complete</div>
-                    <div className="report-title">{effectiveCategory}</div>
+                    <div className="report-title">{effectiveCategory || (reportData?.sum ? reportData.sum.slice(0, 60) + (reportData.sum.length > 60 ? "…" : "") : "Shared Report")}</div>
                     <div className="report-meta">{depth === "quick" ? "Quick Scan" : "Deep Teardown"}{reportData.comps?.length > 0 && ` · comparing ${reportData.comps.join(", ")}`}</div>
                   </div>
                 </div>
               </div>
               <div className="modal-scroll">
                 <ReportTable data={reportData} />
+                <div className="form-hint" style={{ marginTop: 32, textAlign: "center" }}>Generated by UXRival.com — Free AI UX Analysis</div>
               </div>
               <div className="modal-actions">
                 <button type="button" className="btn-secondary" onClick={handleExportPdf}>Export as PDF</button>
+                <button type="button" className="btn-secondary" onClick={handleShareReport}>{shared ? "✓ Link Copied" : "Share Report"}</button>
                 <button type="button" className={`btn-secondary${copied ? " copied" : ""}`} onClick={handleCopy}>{copied ? "✓ Copied" : "Copy JSON"}</button>
               </div>
             </div>
