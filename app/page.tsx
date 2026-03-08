@@ -86,9 +86,10 @@ function buildPrompt(category: string, competitorList: string, depth: string, fo
 UX analysis of "${category}". Compare: ${comps.join(", ")}.
 ${myProductNote}Ratings: Excellent|Good|Average|Poor|Weak. Keep ALL text values under 7 words.
 "rec" = specific design action for someone building a new product in this space.
+"steal" = real-world example of a product that does this dimension well, max 8 words (e.g. "Duolingo's progress bar after each lesson").
 
 Schema:
-{"headline":"single punchy sentence max 20 words summarizing biggest opportunity","sum":"brief summary","scores":{"CompetitorName":0-100 per competitor},"comps":${JSON.stringify(comps)},"secs":[{"cat":"Onboarding","rows":[{"dim":"Sign-up","sc":{${eg}},"ins":"gap insight","rec":"your design recommendation"}]}],"opp":"market gap"}
+{"headline":"single punchy sentence max 20 words summarizing biggest opportunity","sum":"brief summary","scores":{"CompetitorName":0-100 per competitor},"comps":${JSON.stringify(comps)},"secs":[{"cat":"Onboarding","rows":[{"dim":"Sign-up","sc":{${eg}},"ins":"gap insight","rec":"your design recommendation","steal":"real-world example max 8 words"}]}],"opp":"market gap"}
 
 Include "scores" object with overall UX score 0-100 per competitor. Topics (one section each, two rows per section): ${dims.join(", ")}.
 JSON only:`;
@@ -99,9 +100,10 @@ JSON only:`;
 UX analysis of "${category}" category.
 Ratings: Excellent|Good|Average|Poor|Weak. Keep ALL text values under 7 words.
 "rec" = one concrete design improvement a new product builder should implement.
+"steal" = real-world example of a product that does this dimension well, max 8 words (e.g. "Stripe's inline error messages on forms").
 
 Schema:
-{"headline":"single punchy sentence max 20 words summarizing biggest opportunity","sum":"brief summary","category_score":0-100,"secs":[{"cat":"Onboarding","rows":[{"dim":"Sign-up","find":"current pattern","r":"Good","rec":"design recommendation"}]}],"opp":"market gap"}
+{"headline":"single punchy sentence max 20 words summarizing biggest opportunity","sum":"brief summary","category_score":0-100,"secs":[{"cat":"Onboarding","rows":[{"dim":"Sign-up","find":"current pattern","r":"Good","rec":"design recommendation","steal":"real-world example max 8 words"}]}],"opp":"market gap"}
 
 Include "category_score" with overall UX score 0-100 for the category. Topics (one section each, two rows per section): ${dims.join(", ")}.
 JSON only:`;
@@ -287,6 +289,7 @@ const styles = `
   .heatmap-header { font-family: var(--font-m); font-size: 10px; color: var(--text-muted); background: var(--surface2); padding: 10px 12px; display: flex; align-items: center; justify-content: center; text-align: center; }
   .comp-th.you-col, td.you-col { background: var(--accent-dim) !important; }
   .you-badge { font-family: var(--font-m); font-size: 8px; color: var(--accent); background: rgba(232,255,71,0.15); border: 1px solid rgba(232,255,71,0.3); padding: 2px 6px; border-radius: 10px; margin-left: 6px; }
+  .steal-tag { font-family: var(--font-m); font-size: 10px; color: #7c6dfa; background: rgba(124,109,250,0.08); border: 1px solid rgba(124,109,250,0.2); border-radius: 4px; padding: 2px 7px; margin-top: 6px; display: inline-block; }
   .watch-form-inline { padding: 16px 20px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); margin: 0 24px 16px; }
   .nav-badge { background: var(--accent); color: #090909; font-family: var(--font-m); font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 10px; margin-left: 6px; }
   .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--surface); border: 1px solid var(--accent); color: var(--text); padding: 12px 20px; border-radius: var(--radius); font-size: 14px; z-index: 2000; box-shadow: 0 4px 24px rgba(0,0,0,0.4); }
@@ -368,9 +371,9 @@ function ReportTable({ data, myProduct }: { data: any; myProduct?: string }) {
                     <tr key={`${si}-${ri}`}>
                       <td className="dim-cell">{row.dim}</td>
                       {hasC ? (
-                        <>{data.comps.map((c: string, ci: number) => { const s = row.sc?.[c] || {}; return <td key={c} className={`score-cell${firstIsYou && ci === 0 ? " you-col" : ""}`}><div className="score-block"><RatingBadge rating={s.r} />{s.n && <span className="score-note">{s.n}</span>}</div></td>; })}<td className="text-cell">{row.ins}</td><td className="rec-cell">{row.rec}</td></>
+                        <>{data.comps.map((c: string, ci: number) => { const s = row.sc?.[c] || {}; return <td key={c} className={`score-cell${firstIsYou && ci === 0 ? " you-col" : ""}`}><div className="score-block"><RatingBadge rating={s.r} />{s.n && <span className="score-note">{s.n}</span>}</div></td>; })}<td className="text-cell">{row.ins}</td><td className="rec-cell"><div>{row.rec}{row.steal && <div className="steal-tag">💡 {row.steal}</div>}</div></td></>
                       ) : (
-                        <><td className="text-cell">{row.find}</td><td className="score-cell"><RatingBadge rating={row.r} /></td><td className="rec-cell">{row.rec}</td></>
+                        <><td className="text-cell">{row.find}</td><td className="score-cell"><RatingBadge rating={row.r} /></td><td className="rec-cell"><div>{row.rec}{row.steal && <div className="steal-tag">💡 {row.steal}</div>}</div></td></>
                       )}
                     </tr>
                   ))}
