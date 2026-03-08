@@ -291,6 +291,13 @@ const styles = `
   .you-badge { font-family: var(--font-m); font-size: 8px; color: var(--accent); background: rgba(232,255,71,0.15); border: 1px solid rgba(232,255,71,0.3); padding: 2px 6px; border-radius: 10px; margin-left: 6px; }
   .steal-tag { font-family: var(--font-m); font-size: 10px; color: #7c6dfa; background: rgba(124,109,250,0.08); border: 1px solid rgba(124,109,250,0.2); border-radius: 4px; padding: 2px 7px; margin-top: 6px; display: inline-block; }
   .watch-form-inline { padding: 16px 20px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); margin: 0 24px 16px; }
+  .watch-btn-wrap { position: relative; }
+  .watch-btn-wrap .watch-tooltip { position: absolute; bottom: calc(100% + 8px); left: 50%; transform: translateX(-50%); background: #1c1c20; color: var(--text); font-size: 11px; font-family: var(--font-m); padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border); max-width: 220px; text-align: center; white-space: normal; opacity: 0; pointer-events: none; transition: opacity 0.2s; z-index: 10; }
+  .watch-btn-wrap:hover .watch-tooltip { opacity: 1; }
+  .btn-updates { background: var(--accent-dim); border: 1px solid var(--accent); color: var(--accent); border-radius: 8px; padding: 9px 16px; font-family: var(--font-d); font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .btn-updates:hover { background: rgba(232,255,71,0.12); }
+  .pulse-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; animation: pulseDot 1.5s ease-in-out infinite; }
+  @keyframes pulseDot { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.4); } }
   .nav-badge { background: var(--accent); color: #090909; font-family: var(--font-m); font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 10px; margin-left: 6px; }
   .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--surface); border: 1px solid var(--accent); color: var(--text); padding: 12px 20px; border-radius: var(--radius); font-size: 14px; z-index: 2000; box-shadow: 0 4px 24px rgba(0,0,0,0.4); }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
@@ -365,8 +372,8 @@ function ReportTable({ data, myProduct }: { data: any; myProduct?: string }) {
             </thead>
             <tbody>
               {data.secs?.map((sec: any, si: number) => (
-                <>
-                  <tr key={`s${si}`} className="sec-row"><td colSpan={hasC ? data.comps.length + 3 : 4}>{sec.cat}</td></tr>
+                <React.Fragment key={`sec-${si}`}>
+                  <tr className="sec-row"><td colSpan={hasC ? data.comps.length + 3 : 4}>{sec.cat}</td></tr>
                   {sec.rows?.map((row: any, ri: number) => (
                     <tr key={`${si}-${ri}`}>
                       <td className="dim-cell">{row.dim}</td>
@@ -377,7 +384,7 @@ function ReportTable({ data, myProduct }: { data: any; myProduct?: string }) {
                       )}
                     </tr>
                   ))}
-                </>
+                </React.Fragment>
               ))}
             </tbody>
           </table>
@@ -794,7 +801,13 @@ export default function UXRival() {
                 <button type="button" className="btn-secondary" onClick={handleExportPdf}>Export as PDF</button>
                 <button type="button" className="btn-secondary" onClick={handleShareReport}>{shared ? "✓ Link Copied" : "Share Report"}</button>
                 <button type="button" className={`btn-secondary${copied ? " copied" : ""}`} onClick={handleCopy}>{copied ? "✓ Copied" : "Copy JSON"}</button>
-                <button type="button" className="btn-secondary" onClick={() => setShowWatchForm((s) => !s)}>👁 {showWatchForm ? "Cancel" : "Watch this space"}</button>
+                <div className="watch-btn-wrap">
+                  {!showWatchForm && <span className="watch-tooltip">Get this analysis re-run and emailed to you weekly or monthly</span>}
+                  <button type="button" className={showWatchForm ? "btn-secondary" : "btn-updates"} onClick={() => setShowWatchForm((s) => !s)}>
+                    {!showWatchForm && <span className="pulse-dot" />}
+                    {showWatchForm ? "Cancel" : "Get Weekly Updates →"}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
