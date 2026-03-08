@@ -46,9 +46,12 @@ const RATING_META: Record<string, { color: string; bg: string; border: string }>
   Weak:      { color: "#f87171", bg: "rgba(248,113,113,0.08)", border: "rgba(248,113,113,0.25)" },
 };
 
-function buildPrompt(category: string, competitorList: string, depth: string, focusAreas?: string) {
-  const hasComp = competitorList.trim().length > 0;
-  const comps = competitorList.split(/[\n,]+/).map((s) => s.trim()).filter(Boolean).slice(0, 3);
+function buildPrompt(category: string, competitorList: string, depth: string, focusAreas?: string, myProduct?: string) {
+  const otherComps = competitorList.split(/[\n,]+/).map((s) => s.trim()).filter(Boolean);
+  const comps = myProduct?.trim()
+    ? [myProduct.trim(), ...otherComps.slice(0, 2)]
+    : otherComps.slice(0, 3);
+  const hasComp = comps.length > 0;
   const focusDims = focusAreas?.trim()
     ? focusAreas.split(/[\n,]+/).map((s) => s.trim()).filter(Boolean)
     : null;
@@ -60,16 +63,17 @@ function buildPrompt(category: string, competitorList: string, depth: string, fo
 
   if (hasComp) {
     const eg = comps.map((c) => `"${c}":{"r":"Good","n":"5 words"}`).join(",");
+    const myProductNote = myProduct?.trim() ? "\nThe first competitor listed is the user's own product — be objective but highlight where it has advantages.\n" : "";
     return `Output ONLY valid JSON. No markdown, no explanation, no extra text.
 
 UX analysis of "${category}". Compare: ${comps.join(", ")}.
-Ratings: Excellent|Good|Average|Poor|Weak. Keep ALL text values under 7 words.
+${myProductNote}Ratings: Excellent|Good|Average|Poor|Weak. Keep ALL text values under 7 words.
 "rec" = specific design action for someone building a new product in this space.
 
 Schema:
-{"sum":"brief summary","comps":${JSON.stringify(comps)},"secs":[{"cat":"Onboarding","rows":[{"dim":"Sign-up","sc":{${eg}},"ins":"gap insight","rec":"your design recommendation"}]}],"opp":"market gap"}
+{"headline":"single punchy sentence max 20 words summarizing biggest opportunity","sum":"brief summary","scores":{"CompetitorName":0-100 per competitor},"comps":${JSON.stringify(comps)},"secs":[{"cat":"Onboarding","rows":[{"dim":"Sign-up","sc":{${eg}},"ins":"gap insight","rec":"your design recommendation"}]}],"opp":"market gap"}
 
-Topics (one section each, two rows per section): ${dims.join(", ")}.
+Include "scores" object with overall UX score 0-100 per competitor. Topics (one section each, two rows per section): ${dims.join(", ")}.
 JSON only:`;
   }
 
@@ -80,9 +84,9 @@ Ratings: Excellent|Good|Average|Poor|Weak. Keep ALL text values under 7 words.
 "rec" = one concrete design improvement a new product builder should implement.
 
 Schema:
-{"sum":"brief summary","secs":[{"cat":"Onboarding","rows":[{"dim":"Sign-up","find":"current pattern","r":"Good","rec":"design recommendation"}]}],"opp":"market gap"}
+{"headline":"single punchy sentence max 20 words summarizing biggest opportunity","sum":"brief summary","category_score":0-100,"secs":[{"cat":"Onboarding","rows":[{"dim":"Sign-up","find":"current pattern","r":"Good","rec":"design recommendation"}]}],"opp":"market gap"}
 
-Topics (one section each, two rows per section): ${dims.join(", ")}.
+Include "category_score" with overall UX score 0-100 for the category. Topics (one section each, two rows per section): ${dims.join(", ")}.
 JSON only:`;
 }
 
@@ -250,15 +254,36 @@ const styles = `
   .footer-logo { font-size: 14px; font-weight: 700; letter-spacing: -0.03em; }
   .footer-logo span { color: var(--accent); }
   .footer-copy { font-family: var(--font-m); font-size: 11px; color: var(--text-dim); }
+  .score-cards-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+  .score-card { flex: 1; min-width: 100px; max-width: 180px; padding: 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); }
+  .score-card-name { font-family: var(--font-m); font-size: 10px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .score-card-value { font-size: 28px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
+  .score-card-bar { height: 4px; background: var(--border); border-radius: 2px; margin-top: 10px; overflow: hidden; }
+  .score-card-bar-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.3s; }
+  .headline-band { font-family: var(--font-d); font-size: 20px; font-weight: 800; border-left: 3px solid var(--accent); padding: 16px 20px; background: var(--surface); margin-bottom: 16px; }
+  .view-toggle { display: inline-flex; padding: 3px; background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; gap: 0; margin-bottom: 20px; }
+  .view-toggle-btn { padding: 8px 16px; font-family: var(--font-m); font-size: 11px; font-weight: 600; color: var(--text-muted); background: transparent; border: none; border-radius: 16px; cursor: pointer; transition: all 0.15s; }
+  .view-toggle-btn:hover { color: var(--text); }
+  .view-toggle-btn.active { background: var(--accent); color: #090909; }
+  .heatmap-grid { display: grid; gap: 1px; border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .heatmap-cell { min-width: 80px; min-height: 60px; display: flex; align-items: center; justify-content: center; font-family: var(--font-m); font-size: 10px; font-weight: 600; text-align: center; padding: 8px; }
+  .heatmap-header { font-family: var(--font-m); font-size: 10px; color: var(--text-muted); background: var(--surface2); padding: 10px 12px; display: flex; align-items: center; justify-content: center; text-align: center; }
+  .comp-th.you-col, td.you-col { background: var(--accent-dim) !important; }
+  .you-badge { font-family: var(--font-m); font-size: 8px; color: var(--accent); background: rgba(232,255,71,0.15); border: 1px solid rgba(232,255,71,0.3); padding: 2px 6px; border-radius: 10px; margin-left: 6px; }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   .fade-up { animation: fadeUp 0.4s ease; }
   @media (max-width: 860px) { .hero-split { grid-template-columns: 1fr; gap: 36px; } .hero-right { position: static; } }
   @media (max-width: 640px) { .page { padding: 0 18px 100px; } .nav-links { display: none; } .nav-right .btn-primary { padding: 10px 18px; font-size: 13px; } .steps { grid-template-columns: 1fr; } .step:not(:last-child) { border-right: none; border-bottom: 1px solid var(--border); } .form-card { padding: 22px 18px; } .form-footer { flex-direction: column; align-items: stretch; } .radio-group { flex-direction: column; } .report-header { flex-direction: column; } .modal-actions { flex-wrap: wrap; } }
   @media print {
-    .nav, .hero-section, .loading-state, .error-state, #learn, .site-footer { display: none !important; }
-    .modal-overlay { position: static; background: #fff !important; padding: 0; }
-    .modal-close, .modal-actions { display: none !important; }
-    .modal-content { max-height: none; border: none; box-shadow: none; }
+    .nav, .hero-section, .form-card, .loading-state, .error-state, #learn, .site-footer { display: none !important; }
+    .modal-overlay { position: static !important; background: transparent !important; padding: 0; display: block !important; }
+    .modal-content { width: 100% !important; max-width: 100% !important; max-height: none !important; border: none !important; border-radius: 0 !important; box-shadow: none !important; }
+    .modal-close, .modal-actions, .view-toggle { display: none !important; }
+    table, .table-outer, .table-scroll { width: 100% !important; }
+    td, th { font-size: 12px !important; border: 1px solid #333 !important; }
+    table { border-collapse: collapse; }
+    tbody tr { page-break-inside: avoid; }
+    .summary-strip, .opp-band, .report-header { page-break-inside: avoid; }
   }
 `;
 
@@ -271,11 +296,37 @@ function RatingBadge({ rating }: { rating: string }) {
   );
 }
 
-function ReportTable({ data }: { data: any }) {
+function scoreColor(score: number): string {
+  if (score >= 80) return "#4ade80";
+  if (score >= 60) return "#facc15";
+  return "#f87171";
+}
+
+function ReportTable({ data, myProduct }: { data: any; myProduct?: string }) {
   const hasC = data.comps && data.comps.length > 0;
+  const firstIsYou = hasC && myProduct && data.comps[0]?.toLowerCase().trim() === myProduct.toLowerCase().trim();
+  const scoreItems: { name: string; score: number }[] = data.scores
+    ? Object.entries(data.scores).map(([name, score]) => ({ name, score: Number(score) }))
+    : data.category_score != null
+      ? [{ name: "Overall", score: Number(data.category_score) }]
+      : [];
   return (
     <div>
+      {data.headline && <div className="headline-band fade-up">{data.headline}</div>}
       {data.sum && <div className="summary-strip fade-up"><strong>Overview — </strong>{data.sum}</div>}
+      {scoreItems.length > 0 && (
+        <div className="score-cards-row fade-up">
+          {scoreItems.map(({ name, score }) => (
+            <div key={name} className="score-card">
+              <div className="score-card-name">{name}</div>
+              <div className="score-card-value" style={{ color: scoreColor(score) }}>{score}</div>
+              <div className="score-card-bar">
+                <div className="score-card-bar-fill" style={{ width: `${Math.min(100, Math.max(0, score))}%` }} />
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
       <div className={`table-outer fade-up${data.sum ? " has-sum" : ""}`}>
         <div className="table-scroll">
           <table>
@@ -283,7 +334,7 @@ function ReportTable({ data }: { data: any }) {
               <tr>
                 <th>Dimension</th>
                 {hasC ? (
-                  <>{data.comps.map((c: string) => <th key={c} className="comp-th">{c}</th>)}<th className="wide-th">Key Insight</th><th className="rec-th">Your Move ✦</th></>
+                  <>{data.comps.map((c: string, ci: number) => <th key={c} className={`comp-th${firstIsYou && ci === 0 ? " you-col" : ""}`}>{c}{firstIsYou && ci === 0 && <span className="you-badge">You</span>}</th>)}<th className="wide-th">Key Insight</th><th className="rec-th">Your Move ✦</th></>
                 ) : (
                   <><th className="wide-th">Current Pattern</th><th>Rating</th><th className="rec-th">Your Move ✦</th></>
                 )}
@@ -297,7 +348,7 @@ function ReportTable({ data }: { data: any }) {
                     <tr key={`${si}-${ri}`}>
                       <td className="dim-cell">{row.dim}</td>
                       {hasC ? (
-                        <>{data.comps.map((c: string) => { const s = row.sc?.[c] || {}; return <td key={c} className="score-cell"><div className="score-block"><RatingBadge rating={s.r} />{s.n && <span className="score-note">{s.n}</span>}</div></td>; })}<td className="text-cell">{row.ins}</td><td className="rec-cell">{row.rec}</td></>
+                        <>{data.comps.map((c: string, ci: number) => { const s = row.sc?.[c] || {}; return <td key={c} className={`score-cell${firstIsYou && ci === 0 ? " you-col" : ""}`}><div className="score-block"><RatingBadge rating={s.r} />{s.n && <span className="score-note">{s.n}</span>}</div></td>; })}<td className="text-cell">{row.ins}</td><td className="rec-cell">{row.rec}</td></>
                       ) : (
                         <><td className="text-cell">{row.find}</td><td className="score-cell"><RatingBadge rating={row.r} /></td><td className="rec-cell">{row.rec}</td></>
                       )}
@@ -310,6 +361,78 @@ function ReportTable({ data }: { data: any }) {
         </div>
         {data.opp && <div className="opp-band"><span className="opp-label">Gap</span><span className="opp-text">{data.opp}</span></div>}
       </div>
+    </div>
+  );
+}
+
+const RATING_COLORS: Record<string, string> = {
+  Excellent: "#4ade80",
+  Good: "#a3e635",
+  Average: "#facc15",
+  Poor: "#f97316",
+  Weak: "#f87171",
+};
+
+function HeatmapView({ data, myProduct }: { data: any; myProduct?: string }) {
+  const hasC = data.comps && data.comps.length > 0;
+  const cols = hasC ? data.comps : ["Industry"];
+  const firstIsYou = hasC && myProduct && cols[0]?.toLowerCase().trim() === myProduct.toLowerCase().trim();
+  const flatRows: { dim: string; row: any }[] = [];
+  data.secs?.forEach((sec: any) => {
+    sec.rows?.forEach((row: any) => {
+      flatRows.push({ dim: row.dim, row });
+    });
+  });
+  const getCellRating = (row: any, col: string): string => {
+    if (hasC) return row.sc?.[col]?.r || "";
+    return row.r || "";
+  };
+  return (
+    <div>
+      {data.headline && <div className="headline-band fade-up">{data.headline}</div>}
+      {data.sum && <div className="summary-strip fade-up"><strong>Overview — </strong>{data.sum}</div>}
+      {(() => {
+        const scoreItems: { name: string; score: number }[] = data.scores
+          ? Object.entries(data.scores).map(([name, score]) => ({ name, score: Number(score) }))
+          : data.category_score != null
+            ? [{ name: "Overall", score: Number(data.category_score) }]
+            : [];
+        return scoreItems.length > 0 ? (
+          <div className="score-cards-row fade-up">
+            {scoreItems.map(({ name, score }) => (
+              <div key={name} className="score-card">
+                <div className="score-card-name">{name}</div>
+                <div className="score-card-value" style={{ color: scoreColor(score) }}>{score}</div>
+                <div className="score-card-bar">
+                  <div className="score-card-bar-fill" style={{ width: `${Math.min(100, Math.max(0, score))}%` }} />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : null;
+      })()}
+      <div className="heatmap-grid fade-up" style={{ gridTemplateColumns: `minmax(100px, auto) repeat(${cols.length}, minmax(80px, 1fr))` }}>
+        <div className="heatmap-header" style={{ gridColumn: 1 }} />
+        {cols.map((c: string, ci: number) => (
+          <div key={c} className={`heatmap-header${firstIsYou && ci === 0 ? " you-col" : ""}`}>{c}{firstIsYou && ci === 0 && <span className="you-badge" style={{ marginLeft: 6 }}>You</span>}</div>
+        ))}
+        {flatRows.map((r, ri) => (
+          <React.Fragment key={ri}>
+            <div className="heatmap-header" style={{ justifyContent: "flex-start" }}>{r.dim}</div>
+            {cols.map((colKey: string, ci: number) => {
+              const rating = getCellRating(r.row, colKey);
+              const bg = RATING_COLORS[rating] || "var(--surface2)";
+              const isYouCol = firstIsYou && ci === 0;
+              return (
+                <div key={colKey} className={`heatmap-cell${isYouCol ? " you-col" : ""}`} style={{ background: isYouCol ? "var(--accent-dim)" : bg, color: rating ? "#090909" : "var(--text-muted)" }}>
+                  {rating || "—"}
+                </div>
+              );
+            })}
+          </React.Fragment>
+        ))}
+      </div>
+      {data.opp && <div className="opp-band" style={{ marginTop: 16 }}><span className="opp-label">Gap</span><span className="opp-text">{data.opp}</span></div>}
     </div>
   );
 }
@@ -375,8 +498,11 @@ export default function UXRival() {
   const [errorMsg, setErrorMsg] = useState("");
   const [copied, setCopied] = useState(false);
   const [shared, setShared] = useState(false);
+  const [reportViewMode, setReportViewMode] = useState<"table" | "heatmap">("table");
+  const [analysisMode, setAnalysisMode] = useState<"competitor" | "myProduct">("competitor");
+  const [myProduct, setMyProduct] = useState("");
   const effectiveCategory = industry === "custom" ? customCategory : industry;
-  const canSubmit = !loading && (industry === "custom" ? customCategory.trim().length > 0 : industry.length > 0);
+  const canSubmit = !loading && (industry === "custom" ? customCategory.trim().length > 0 : industry.length > 0) && (analysisMode !== "myProduct" || myProduct.trim().length > 0);
 
   useEffect(() => {
     const reportParam = searchParams.get("report");
@@ -400,7 +526,7 @@ export default function UXRival() {
       const res = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: buildPrompt(effectiveCategory, competitors, depth, focusAreas) }),
+        body: JSON.stringify({ prompt: buildPrompt(effectiveCategory, competitors, depth, focusAreas, analysisMode === "myProduct" ? myProduct : undefined) }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const { text: raw } = await res.json();
@@ -479,6 +605,18 @@ export default function UXRival() {
             <div className="hero-right" id="form">
               <div className="form-card">
                 <div className="form-row">
+                  <div className="view-toggle" style={{ marginBottom: 0 }}>
+                    <button type="button" className={`view-toggle-btn${analysisMode === "competitor" ? " active" : ""}`} onClick={() => setAnalysisMode("competitor")}>Competitor Analysis</button>
+                    <button type="button" className={`view-toggle-btn${analysisMode === "myProduct" ? " active" : ""}`} onClick={() => setAnalysisMode("myProduct")}>My Product vs Market</button>
+                  </div>
+                </div>
+                {analysisMode === "myProduct" && (
+                  <div className="form-row">
+                    <span className="field-label">Your Product Name</span>
+                    <input type="text" placeholder="e.g. MyApp, Payonus, Kuda" value={myProduct} onChange={(e) => setMyProduct(e.target.value)} style={{ width: "100%" }} />
+                  </div>
+                )}
+                <div className="form-row">
                   <span className="field-label">Industry or Niche</span>
                   <IndustryDropdown value={industry} customValue={customCategory} onChange={setIndustry} onCustomChange={setCustomCategory} />
                 </div>
@@ -545,7 +683,11 @@ export default function UXRival() {
                 </div>
               </div>
               <div className="modal-scroll">
-                <ReportTable data={reportData} />
+                <div className="view-toggle">
+                  <button type="button" className={`view-toggle-btn${reportViewMode === "table" ? " active" : ""}`} onClick={() => setReportViewMode("table")}>Table View</button>
+                  <button type="button" className={`view-toggle-btn${reportViewMode === "heatmap" ? " active" : ""}`} onClick={() => setReportViewMode("heatmap")}>Heatmap View</button>
+                </div>
+                {reportViewMode === "table" ? <ReportTable data={reportData} myProduct={analysisMode === "myProduct" ? myProduct : undefined} /> : <HeatmapView data={reportData} myProduct={analysisMode === "myProduct" ? myProduct : undefined} />}
                 <div className="form-hint" style={{ marginTop: 32, textAlign: "center" }}>Generated by UXRival.com — Free AI UX Analysis</div>
               </div>
               <div className="modal-actions">
