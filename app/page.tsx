@@ -647,6 +647,7 @@ export default function UXRival() {
     const email = emailInput.trim();
     if (!email) return;
     if (typeof window !== "undefined") localStorage.setItem(EMAIL_STORAGE_KEY, email);
+    fetch("/api/welcome", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email }) }).catch(() => {});
     fetch("https://script.google.com/macros/s/AKfycbw5j4DrGmxOef2CCtJ-M7mcEc-F50-Tu1oA_uXSAsVUwFFoIzbXO20WbPGSlJQoSo5p/exec", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
