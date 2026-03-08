@@ -686,10 +686,12 @@ export default function UXRival() {
             <div className="hero-left">
               <div className="hero-kicker">AI-powered UX intelligence</div>
               <h1 className="hero-h1">Know where your<br /><em>competitors</em><br />are failing</h1>
-              <p className="hero-sub">Instant structured teardowns of any product category. Built for designers and agencies who move fast.</p>
+              <p className="hero-sub">Instant structured teardowns, UX scoring, heatmaps and weekly monitoring for any product category. Built for designers and agencies who move fast.</p>
               <div className="hero-trust">
                 <span className="trust-item">⚡ Results in ~10s</span><span className="trust-sep">·</span>
                 <span className="trust-item">30+ industries</span><span className="trust-sep">·</span>
+                <span className="trust-item">UX Scoring</span><span className="trust-sep">·</span>
+                <span className="trust-item">Weekly Alerts</span><span className="trust-sep">·</span>
                 <span className="trust-item">Free · No signup</span>
               </div>
             </div>
@@ -821,11 +823,13 @@ export default function UXRival() {
             <div className="features-grid">
               {[
                 { icon: "⚡", title: "Instant teardowns", desc: "Pick an industry and get a structured UX breakdown in under 30 seconds." },
-                { icon: "⚔️", title: "Side-by-side comparison", desc: "Add up to 3 competitors and see how each scores across key UX dimensions." },
-                { icon: "✦", title: "Your Move recommendations", desc: "Every row includes a concrete design action based on what competitors miss." },
-                { icon: "📊", title: "Tabular reports", desc: "Clean comparison table with ratings, findings, and insights." },
-                { icon: "🔍", title: "Gap analysis", desc: "Each report surfaces the biggest unmet UX opportunity in the space." },
-                { icon: "🎯", title: "Depth control", desc: "Quick Scan for 4 dimensions, or Deep Teardown for a full 6-dimension audit." },
+                { icon: "⚔️", title: "Side-by-side comparison", desc: "Score up to 3 competitors across key UX dimensions in one report." },
+                { icon: "🔥", title: "UX Heatmap", desc: "See ratings as a colour grid — one glance tells the whole story. Perfect for client presentations." },
+                { icon: "✦", title: "Steal This Pattern", desc: "Every recommendation includes a real product that does it well. Stop guessing, start stealing." },
+                { icon: "📊", title: "UX Scoring", desc: "Every competitor gets a score out of 100. See who's winning and by how much." },
+                { icon: "👁", title: "Weekly Monitoring", desc: "Watch any product category and get re-run analyses delivered to your email weekly or monthly." },
+                { icon: "🎯", title: "My Product vs Market", desc: "Add your own product to the comparison and see exactly where you win and lose." },
+                { icon: "📄", title: "Export & Share", desc: "Export as PDF or share a live report link with clients instantly." },
               ].map((f) => <div key={f.title} className="feature-card"><div className="feature-icon">{f.icon}</div><div className="feature-title">{f.title}</div><div className="feature-desc">{f.desc}</div></div>)}
             </div>
           </section>
@@ -835,9 +839,9 @@ export default function UXRival() {
             <div className="steps-wrap" style={{ marginTop: 40 }}>
               <div className="steps">
                 {[
-                  { n: "01", title: "Pick your industry", desc: "Select from 30+ categories or type your own. Optionally add up to 3 competitors." },
-                  { n: "02", title: "Choose depth", desc: "Quick Scan for 4 areas. Deep Teardown for 6 detailed dimensions." },
-                  { n: "03", title: "Read your report", desc: "Ratings, findings, and Your Move recommendations — ready to act on." },
+                  { n: "01", title: "Pick your industry", desc: "Select from 30+ categories or type your own. Add up to 3 competitors or your own product." },
+                  { n: "02", title: "Customise your analysis", desc: "Choose depth, set focus areas, and switch between competitor mode or my product mode." },
+                  { n: "03", title: "Get your report", desc: "See scores, heatmap, steal-worthy patterns and Your Move recommendations. Export or share instantly." },
                 ].map((s) => <div key={s.n} className="step"><div className="step-num">STEP {s.n}</div><div className="step-title">{s.title}</div><div className="step-desc">{s.desc}</div></div>)}
               </div>
             </div>
@@ -851,6 +855,7 @@ export default function UXRival() {
                 { accent: "UX Agencies", desc: "Produce client-ready audits in minutes, not days." },
                 { accent: "Founders", desc: "Find UX gaps your competitors haven't filled yet." },
                 { accent: "Product Managers", desc: "Brief your design team with structured competitive context." },
+                { accent: "Startups", desc: "Benchmark your product against established players before you ship. Know where you stand from day one." },
               ].map((a) => <div key={a.accent} className="audience-card"><div className="audience-role"><span>{a.accent}</span></div><div className="audience-desc">{a.desc}</div></div>)}
             </div>
           </section>
