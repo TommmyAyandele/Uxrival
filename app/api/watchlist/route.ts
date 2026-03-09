@@ -3,54 +3,176 @@ import { NextRequest, NextResponse } from "next/server";
 
 function formatReportHtml(data: any): string {
   const hasC = data.comps && data.comps.length > 0;
-  let tableRows = "";
-
+  
+  // Header
+  const header = `
+    <div style="background:#0a0a0a;padding:24px 32px;text-align:center;position:relative;">
+      <div style="display:inline-block;vertical-align:middle;">
+        <span style="color:#efefef;font-size:24px;font-weight:800;letter-spacing:-0.03em;">UX</span>
+        <span style="color:#e8ff47;font-size:24px;font-weight:800;letter-spacing:-0.03em;">Rival</span>
+      </div>
+      <div style="position:absolute;right:32px;top:50%;transform:translateY(-50%);background:#e8ff47;color:#0a0a0a;padding:6px 12px;border-radius:20px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;">
+        AI UX Report
+      </div>
+    </div>
+  `;
+  
+  // Headline band
+  const headline = data.headline ? `
+    <div style="background:#111111;padding:28px 32px;margin:0;">
+      <div style="border-left:3px solid #e8ff47;padding:0 16px;">
+        <h2 style="color:#ffffff;font-size:18px;font-weight:700;margin:0;line-height:1.4;">${data.headline}</h2>
+      </div>
+    </div>
+  ` : '';
+  
+  // Summary
+  const summary = data.sum ? `
+    <div style="padding:20px 32px;margin:0;">
+      <p style="font-size:14px;color:#b0b0bc;line-height:1.6;">
+        <strong style="color:#efefef;">Overview —</strong> ${data.sum}
+      </p>
+    </div>
+  ` : '';
+  
+  // Score cards
+  const scoreCards = hasC ? `
+    <div style="background:#ffffff;padding:20px 32px;display:flex;flex-wrap:wrap;gap:16px;justify-content:center;">
+      ${data.comps.map((comp: string, index: number) => {
+        const score = data.scores?.[comp] || 0;
+        const scoreColor = score >= 80 ? '#4ade80' : score >= 60 ? '#a3e635' : score >= 40 ? '#facc15' : '#f87171';
+        return `
+          <div style="border:1px solid #eeeeee;border-radius:12px;padding:16px 20px;text-align:center;min-width:120px;flex:1;">
+            <div style="font-size:11px;color:#888888;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px;">${comp}</div>
+            <div style="font-size:36px;font-weight:700;color:${scoreColor};margin-bottom:4px;">${score}</div>
+            <div style="font-size:11px;color:#888888;">${score >= 80 ? 'Excellent' : score >= 60 ? 'Good' : score >= 40 ? 'Average' : 'Poor'}</div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  ` : '';
+  
+  // Table
+  let tableRows = '';
   if (data.secs) {
     for (const sec of data.secs) {
-      tableRows += `<tr><td colspan="${hasC ? data.comps.length + 3 : 4}" style="background:#0a0a0d;padding:8px 12px;font-family:monospace;font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.1em">${sec.cat}</td></tr>`;
+      tableRows += `
+        <tr style="background:#f5f5f5;color:#888888;font-size:11px;text-transform:uppercase;letter-spacing:0.1em;">
+          <td style="padding:10px 12px;font-weight:600;">${sec.cat}</td>
+          <td colspan="${data.comps.length}" style="padding:10px 12px;text-align:center;font-weight:600;">${data.comps.map(() => '').join(' / ')}</td>
+          <td style="padding:10px 12px;">Key Insight</td>
+          <td style="padding:10px 12px;">Your Move</td>
+        </tr>
+      `;
+      
       for (const row of sec.rows || []) {
         if (hasC) {
           const cells = data.comps
             .map(
-              (c: string) =>
-                `<td style="padding:10px 12px;font-size:13px;border-bottom:1px solid #222">${row.sc?.[c]?.r || "—"}</td>`
+              (c: string) => {
+                const rating = row.sc?.[c]?.r || "—";
+                const ratingColor = 
+                  rating === "Excellent" ? "#4ade80" :
+                  rating === "Good" ? "#a3e635" :
+                  rating === "Average" ? "#facc15" :
+                  rating === "Poor" ? "#f97316" :
+                  rating === "Weak" ? "#f87171" : "#666666";
+                return `<td style="padding:10px 12px;font-size:13px;border-bottom:1px solid #f0f0f0;"><span style="color:${ratingColor};font-weight:600;">${rating}</span></td>`;
+              }
             )
             .join("");
-          tableRows += `<tr><td style="padding:10px 12px;font-size:11px;color:#666;font-weight:600">${row.dim}</td>${cells}<td style="padding:10px 12px;font-size:12px;color:#8a8a98">${row.ins || ""}</td><td style="padding:10px 12px;font-size:12px;color:#a89ef5">${row.rec || ""}</td></tr>`;
+          tableRows += `
+            <tr style="border-bottom:1px solid #f0f0f0;">
+              <td style="padding:10px 12px;font-size:11px;color:#888888;font-weight:600;">${row.dim}</td>
+              ${cells}
+              <td style="padding:10px 12px;font-size:12px;color:#b0b0bc;">${row.ins || ""}</td>
+              <td style="padding:10px 12px;font-size:12px;color:#5a4fd6;">${row.rec || ""}</td>
+            </tr>
+          `;
         } else {
-          tableRows += `<tr><td style="padding:10px 12px;font-size:11px;color:#666">${row.dim}</td><td style="padding:10px 12px;font-size:12px">${row.find || ""}</td><td style="padding:10px 12px">${row.r || ""}</td><td style="padding:10px 12px;color:#a89ef5">${row.rec || ""}</td></tr>`;
+          tableRows += `
+            <tr style="border-bottom:1px solid #f0f0f0;">
+              <td style="padding:10px 12px;font-size:11px;color:#888888;">${row.find || ""}</td>
+              <td style="padding:10px 12px;font-size:13px;">${row.r || ""}</td>
+              <td style="padding:10px 12px;font-size:12px;color:#5a4fd6;">${row.rec || ""}</td>
+            </tr>
+          `;
         }
       }
     }
   }
-
-  const headerCells = hasC
-    ? `<th style="padding:12px;font-size:10px;color:#e8ff47;text-align:left">${(data.comps || []).join("</th><th style=\"padding:12px;font-size:10px;color:#e8ff47;text-align:left\">")}</th><th style="padding:12px;font-size:10px;color:#7c6dfa">Key Insight</th><th style="padding:12px;font-size:10px;color:#7c6dfa">Your Move</th>`
-    : `<th style="padding:12px;font-size:10px">Current Pattern</th><th style="padding:12px;font-size:10px">Rating</th><th style="padding:12px;font-size:10px;color:#7c6dfa">Your Move</th>`;
+  
+  const table = `
+    <div style="margin:0 32px;overflow-x:auto;">
+      <table style="width:100%;border-collapse:collapse;border:1px solid #e0e0e0;border-radius:8px;background:#ffffff;">
+        <thead style="background:#f5f5f5;">
+          <tr>
+            <th style="padding:12px;font-size:11px;color:#888888;text-align:left;">Dimension</th>
+            ${hasC ? data.comps.map(() => `<th style="padding:12px;font-size:11px;color:#888888;text-align:center;">Competitor</th>`).join('') : ''}
+            <th style="padding:12px;font-size:11px;color:#888888;text-align:left;">Key Insight</th>
+            <th style="padding:12px;font-size:11px;color:#888888;text-align:left;">Your Move</th>
+          </tr>
+        </thead>
+        <tbody style="font-size:13px;">
+          ${tableRows}
+        </tbody>
+      </table>
+    </div>
+  `;
+  
+  // Gap opportunity
+  const gap = data.opp ? `
+    <div style="background:#fffbeb;border-left:3px solid #e8ff47;margin:0 32px;padding:14px 16px;">
+      <div style="font-size:10px;color:#8a7a00;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">OPPORTUNITY</div>
+      <div style="font-size:13px;color:#555555;">${data.opp}</div>
+    </div>
+  ` : '';
+  
+  // CTA
+  const cta = `
+    <div style="text-align:center;margin:28px auto;">
+      <a href="https://uxrival.xyz" style="display:inline-block;background:#e8ff47;color:#0a0a0a;font-weight:700;font-size:14px;padding:14px 32px;border-radius:8px;text-decoration:none;width:fit-content;">View Full Report on UXRival.xyz →</a>
+    </div>
+  `;
+  
+  // Footer
+  const footer = `
+    <div style="background:#f9f9f9;padding:20px 32px;border-top:1px solid #eeeeee;">
+      <div style="font-size:12px;color:#aaaaaa;">Sent by UX Rival · uxrival.xyz · You're receiving this because you saved a watchlist on UX Rival</div>
+    </div>
+  `;
 
   return `
-<!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"><title>UX Report</title></head>
-<body style="margin:0;padding:24px;font-family:system-ui,-apple-system,sans-serif;background:#090909;color:#efefef">
-  <div style="max-width:800px;margin:0 auto">
-    <h1 style="font-size:24px;margin-bottom:8px">UX Rival Report</h1>
-    ${data.headline ? `<p style="font-size:18px;font-weight:700;border-left:3px solid #e8ff47;padding:12px 16px;background:#101012;margin-bottom:16px">${data.headline}</p>` : ""}
-    ${data.sum ? `<p style="font-size:14px;color:#b0b0bc;line-height:1.6;margin-bottom:24px"><strong>Overview —</strong> ${data.sum}</p>` : ""}
-    <table style="width:100%;border-collapse:collapse;border:1px solid #212126;border-radius:8px;overflow:hidden">
-      <thead style="background:#0c0c0e">
-        <tr>
-          <th style="padding:12px;font-size:10px;color:#666;text-align:left">Dimension</th>
-          ${headerCells}
-        </tr>
-      </thead>
-      <tbody>${tableRows}</tbody>
-    </table>
-    ${data.opp ? `<div style="margin-top:16px;padding:14px 20px;background:rgba(232,255,71,0.07);border-top:1px solid rgba(232,255,71,0.1)"><span style="font-size:9px;color:#e8ff47;letter-spacing:0.1em">GAP</span><p style="margin:4px 0 0;font-size:13px;color:#c8d87a">${data.opp}</p></div>` : ""}
-    <p style="margin-top:32px;font-size:11px;color:#3a3a42;font-family:monospace">Generated by UXRival.com — Free AI UX Analysis</p>
-  </div>
-</body>
-</html>`;
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>UX Report</title>
+      <style>
+        @media (max-width: 600px) {
+          .score-card { min-width: 100px !important; }
+          .score-cards { flex-direction: column !important; gap: 12px !important; }
+          table { width: calc(100% - 64px) !important; }
+          thead th:nth-child(n+3), thead th:nth-child(n+4) { display: none !important; }
+          td:nth-child(n+3) { display: none !important; }
+        }
+      </style>
+    </head>
+    <body style="margin:0;padding:0;background:#ffffff;font-family:Arial, sans-serif;color:#333333;">
+      <div style="max-width:600px;margin:0 auto;background:#ffffff;">
+        ${header}
+        ${headline}
+        ${summary}
+        ${scoreCards}
+        ${table}
+        ${gap}
+        ${cta}
+        ${footer}
+      </div>
+    </body>
+    </html>
+  `;
 }
 
 export async function POST(req: NextRequest) {
