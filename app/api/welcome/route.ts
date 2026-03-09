@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
 
     const resend = new Resend(resendKey);
     await resend.emails.send({
-      from: "UX Rival <onboarding@resend.dev>",
+      from: "UX Rival <hello@uxrival.xyz>",
       to: email,
       subject: "Welcome to UX Rival — your free analysis is ready 🎉",
       html: welcomeHtml,

@@ -80,14 +80,19 @@ export async function POST(req: NextRequest) {
     const html = formatReportHtml(reportData);
 
     const resend = new Resend(resendKey);
-    await resend.emails.send({
-      from: "UX Rival <onboarding@resend.dev>",
-      to: email,
-      subject: `Your UX Rival Report — ${category}`,
-      html,
-    });
-
-    return NextResponse.json({ success: true });
+    try {
+      const data = await resend.emails.send({
+        from: "UX Rival <hello@uxrival.xyz>",
+        to: email,
+        subject: `Your UX Rival Report — ${category}`,
+        html,
+      });
+      console.log("RESEND RESPONSE:", JSON.stringify(data));
+      return NextResponse.json({ success: true });
+    } catch (error: any) {
+      console.log("RESEND ERROR:", JSON.stringify(error));
+      return NextResponse.json({ error: error.message || "Failed to send email" }, { status: 500 });
+    }
   } catch (err: unknown) {
     console.error("Watchlist send error:", err);
     const msg = err instanceof Error ? err.message : "Unknown error";
