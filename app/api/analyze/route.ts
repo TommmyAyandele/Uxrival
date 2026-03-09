@@ -29,41 +29,63 @@ export async function POST(req: NextRequest) {
 
     const ai = new GoogleGenAI({ apiKey });
 
-    // Using the current 2026 stable-preview model ID
-    let attempt = 1;
+    // Models to try in order of preference
+    const models = ["gemini-2.0-flash-lite", "gemini-2.0-flash", "gemini-2.5-flash"];
     let response;
     let text;
+    let lastError;
 
-    while (attempt <= 3) {
+    for (const modelName of models) {
       try {
-        console.log(`Retrying Gemini... attempt ${attempt}`);
-        response = await ai.models.generateContent({
-          model: "gemini-3.1-flash-lite-preview",
-          contents: [{ role: "user", parts: [{ text: prompt }] }],
-        });
+        console.log("Trying model:", modelName);
+        
+        // Try the current model with one retry
+        let attempt = 1;
+        while (attempt <= 2) {
+          try {
+            response = await ai.models.generateContent({
+              model: modelName,
+              contents: [{ role: "user", parts: [{ text: prompt }] }],
+            });
 
-        text = response.text || "No response generated.";
+            text = response.text || "No response generated.";
+            
+            // If successful, break out of both loops
+            if (text && text !== "No response generated.") {
+              console.log("Success with model:", modelName);
+              break;
+            }
+          } catch (err: any) {
+            console.error(`Model ${modelName} attempt ${attempt} failed:`, err.message);
+            lastError = err.message;
+            
+            // If it's a retryable error (503 or 429) and we have attempts left
+            if (attempt < 2 && (err.message?.includes('503') || err.message?.includes('429'))) {
+              // Wait 2 seconds before retrying
+              await new Promise(resolve => setTimeout(resolve, 2000));
+            } else {
+              // Non-retryable error or no attempts left, break to try next model
+              break;
+            }
+          }
+          
+          attempt++;
+        }
         
-        // If successful, break the retry loop
-        break;
-      } catch (err: any) {
-        console.error(`Attempt ${attempt} failed:`, err.message);
-        
-        // Check if it's a retryable error (503 or 429)
-        if (attempt < 3 && (err.message?.includes('503') || err.message?.includes('429'))) {
-          // Wait 3 seconds before retrying
-          await new Promise(resolve => setTimeout(resolve, 3000));
-        } else {
-          // Non-retryable error, break the loop
+        // If we got a successful response, break out of model loop
+        if (response && text && text !== "No response generated.") {
           break;
         }
+      } catch (err: any) {
+        console.error(`Model ${modelName} completely failed:`, err.message);
+        lastError = err.message;
       }
-      
-      attempt++;
     }
 
-    if (!response) {
-      return NextResponse.json({ error: "Failed after 3 attempts" }, { 
+    if (!response || !text || text === "No response generated.") {
+      return NextResponse.json({ 
+        error: "Our AI is experiencing high demand right now. Please try again in a minute." 
+      }, { 
         status: 500,
         headers: {
           "Access-Control-Allow-Origin": "*",
