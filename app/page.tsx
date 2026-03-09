@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 
 const EMAIL_STORAGE_KEY = "uxrival_email";
 const WATCHLIST_STORAGE_KEY = "uxrival_watchlist";
+const THEME_STORAGE_KEY = "uxrival_theme";
 
 type WatchlistItem = { id: string; category: string; competitors: string; depth: string; email: string; frequency: string; savedAt: string };
 
@@ -119,8 +120,22 @@ const styles = `
     --accent: #e8ff47; --accent-dim: rgba(232,255,71,0.07); --accent-glow: rgba(232,255,71,0.18);
     --red: #ff4757; --font-d: 'Syne', sans-serif; --font-m: 'DM Mono', monospace; --radius: 14px;
   }
+  [data-theme="light"] {
+    --bg: #ffffff;
+    --surface: #f5f5f7;
+    --surface2: #ebebed;
+    --surface3: #e0e0e3;
+    --border: #d1d1d6;
+    --border-hover: #b0b0b8;
+    --text: #0a0a0a;
+    --text-muted: #4a4a55;
+    --text-dim: #8a8a98;
+    --accent: #c8b800;
+    --accent-dim: rgba(200,184,0,0.08);
+    --accent-glow: rgba(200,184,0,0.18);
+  }
   html { scroll-behavior: smooth; }
-  body { background: var(--bg); color: var(--text); font-family: var(--font-d); -webkit-font-smoothing: antialiased; }
+  body { background: var(--bg); color: var(--text); font-family: var(--font-d); -webkit-font-smoothing: antialiased; transition: background 0.2s, color 0.2s; }
   .page { max-width: 1120px; margin: 0 auto; padding: 0 28px 140px; }
   .nav { display: flex; align-items: center; justify-content: space-between; padding: 22px 0; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: rgba(9,9,9,0.92); backdrop-filter: blur(12px); z-index: 200; }
   .nav-left { display: flex; align-items: center; gap: 10px; }
@@ -131,6 +146,14 @@ const styles = `
   .nav-links { display: flex; align-items: center; gap: 28px; }
   .nav-link { font-size: 13px; color: var(--text-muted); cursor: pointer; transition: color 0.15s; }
   .nav-link:hover { color: var(--text); }
+  .theme-toggle { display: inline-flex; padding: 3px; background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; gap: 0; }
+  .theme-toggle-option { font-family: var(--font-m); font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 16px; background: transparent; border: none; cursor: pointer; transition: all 0.15s; }
+  .theme-toggle-option:hover { color: var(--text); }
+  .theme-toggle-option.active { background: var(--surface3); color: var(--text); }
+  [data-theme="light"] .nav { background: rgba(255,255,255,0.92); }
+  [data-theme="light"] .nav-logo span { color: #8a7a00; }
+  [data-theme="light"] .nav-pill { color: #8a7a00; background: var(--accent-dim); border-color: rgba(200,184,0,0.2); }
+  [data-theme="light"] .nav-badge { background: #8a7a00; color: white; }
   .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 24px; overflow: hidden; }
   .modal-content { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); max-width: 1100px; width: 100%; max-height: 90vh; display: flex; flex-direction: column; position: relative; }
   .modal-header { padding: 24px 24px 0; flex-shrink: 0; }
@@ -515,6 +538,7 @@ function IndustryDropdown({ value, customValue, onChange, onCustomChange }: {
 
 export default function UXRival() {
   const searchParams = useSearchParams();
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [industry, setIndustry] = useState("");
   const [customCategory, setCustomCategory] = useState("");
   const [competitors, setCompetitors] = useState("");
@@ -550,6 +574,24 @@ export default function UXRival() {
       setWatchEmail(localStorage.getItem(EMAIL_STORAGE_KEY) || "");
     }
   }, [showWatchForm]);
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem(THEME_STORAGE_KEY) as "dark" | "light" | null;
+    if (savedTheme) {
+      setTheme(savedTheme);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      document.documentElement.setAttribute("data-theme", theme);
+      localStorage.setItem(THEME_STORAGE_KEY, theme);
+    }
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(theme === "dark" ? "light" : "dark");
+  };
 
   const handleStartWatching = () => {
     const email = watchEmail.trim();
@@ -677,6 +719,10 @@ export default function UXRival() {
               <span className="nav-link" onClick={scrollToLearn}>How it works</span>
               <span className="nav-link" onClick={scrollToLearn}>Who it&apos;s for</span>
               <span className="nav-link" onClick={() => setShowWatchlistModal(true)} style={{ display: "flex", alignItems: "center" }}>Watchlist{watchlist.length > 0 && <span className="nav-badge">{watchlist.length}</span>}</span>
+            </div>
+            <div className="theme-toggle">
+              <button type="button" className={`theme-toggle-option${theme === "dark" ? " active" : ""}`} onClick={() => setTheme("dark")}>Dark</button>
+              <button type="button" className={`theme-toggle-option${theme === "light" ? " active" : ""}`} onClick={() => setTheme("light")}>Light</button>
             </div>
             <button type="button" className="btn-primary" onClick={scrollToForm}>Get Started Free →</button>
           </div>
