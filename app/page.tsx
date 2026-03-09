@@ -8,7 +8,7 @@ const THEME_STORAGE_KEY = "uxrival_theme";
 const TOUR_STORAGE_KEY = "uxrival_toured";
 const HISTORY_STORAGE_KEY = "uxrival_history";
 
-type WatchlistItem = { id: string; category: string; competitors: string; depth: string; email: string; frequency: string; savedAt: string; reportData: any };
+type WatchlistItem = { id: string; category: string; competitors: string; depth: string; email: string; frequency: string; savedAt: string; reportData: any | null };
 type HistoryItem = { id: string; category: string; competitors: string; depth: string; reportData: any; createdAt: string };
 
 function loadWatchlist(): WatchlistItem[] {
@@ -987,7 +987,7 @@ export default function UXRival() {
       email,
       frequency: watchFrequency,
       savedAt: new Date().toISOString(),
-      reportData: reportData,
+      reportData: reportData || null,
     };
     const next = [...watchlist, item];
     setWatchlist(next);
@@ -1004,22 +1004,31 @@ export default function UXRival() {
   };
 
   const handleSendNow = async (item: WatchlistItem) => {
+    if (!item.reportData) {
+      setToastMsg("No report data available — run an analysis first");
+      setTimeout(() => setToastMsg(""), 3000);
+      return;
+    }
+    
     setSendNowId(item.id);
+    const payload = { 
+      email: item.email, 
+      category: item.category, 
+      competitors: item.competitors, 
+      depth: item.depth, 
+      reportData: item.reportData 
+    };
+    console.log("SENDING WATCHLIST:", JSON.stringify(payload));
+    
     try {
       const res = await fetch("/api/watchlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          email: item.email, 
-          category: item.category, 
-          competitors: item.competitors, 
-          depth: item.depth, 
-          reportData: item.reportData 
-        }),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (data.success) setToastMsg("Report sent to your email ✓");
-      else setToastMsg("Failed to send — try again");
+      else setToastMsg(data.error || "Failed to send — try again");
     } catch (err: any) {
       console.error("Send now error:", err);
       setToastMsg("Failed to send — try again");

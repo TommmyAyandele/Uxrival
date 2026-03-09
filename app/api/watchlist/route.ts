@@ -55,10 +55,22 @@ function formatReportHtml(data: any): string {
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, category, competitors, depth, reportData } = await req.json();
+    const body = await req.clone().json();
+    console.log("WATCHLIST BODY:", JSON.stringify(body));
+    
+    const { email, category, competitors, depth, reportData } = body;
 
-    if (!email || !category || !reportData) {
+    if (!email) {
+      console.log("MISSING FIELD: email");
       return NextResponse.json({ error: "email, category, and reportData required" }, { status: 400 });
+    }
+    if (!category) {
+      console.log("MISSING FIELD: category");
+      return NextResponse.json({ error: "email, category, and reportData required" }, { status: 400 });
+    }
+    if (!reportData) {
+      console.log("MISSING FIELD: reportData");
+      return NextResponse.json({ error: "No report data available. Please run an analysis first, then add to watchlist." }, { status: 400 });
     }
 
     const resendKey = process.env.RESEND_API_KEY;
