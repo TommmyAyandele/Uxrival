@@ -291,6 +291,24 @@
     let currentData = null;
     let currentDepth = 'quick';
     
+    // Listen for messages from code.js
+    window.onmessage = (event) => {
+      const msg = event.data.pluginMessage;
+      if (msg.type === 'result') {
+        currentData = msg.data;
+        displayResults(msg.data);
+        // Reset button
+        document.getElementById('analyzeBtn').textContent = 'Analyze';
+        document.getElementById('analyzeBtn').disabled = false;
+      }
+      if (msg.type === 'error') {
+        showError(msg.message);
+        // Reset button
+        document.getElementById('analyzeBtn').textContent = 'Analyze';
+        document.getElementById('analyzeBtn').disabled = false;
+      }
+    };
+    
     // Depth toggle
     document.querySelectorAll('.depth-btn').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -322,25 +340,7 @@
       document.getElementById('error').style.display = 'none';
       
       try {
-        const prompt = buildPrompt(industry, competitors, currentDepth);
-        
-        const response = await fetch('https://uxrival.xyz/api/analyze', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ prompt }),
-        });
-        
-        const data = await response.json();
-        
-        if (!response.ok) {
-          throw new Error(data.error || 'Analysis failed');
-        }
-        
-        currentData = data;
-        displayResults(data);
-        
+        parent.postMessage({ pluginMessage: { type: 'analyze', payload: { industry, competitors, depth: currentDepth } } }, '*');
       } catch (error) {
         showError(error.message || 'Failed to analyze. Please try again.');
       } finally {

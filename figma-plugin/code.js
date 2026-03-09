@@ -4,7 +4,65 @@ figma.ui.onmessage = async (msg) => {
   if (msg.type === 'create-frame' && msg.data) {
     await createReportFrame(msg.data);
   }
+  
+  if (msg.type === 'analyze') {
+    try {
+      const prompt = buildPrompt(msg.payload);
+      
+      const res = await fetch('https://uxrival.xyz/api/analyze', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt })
+      });
+      
+      const data = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(data.error || 'Analysis failed');
+      }
+      
+      figma.ui.postMessage({ type: 'result', data });
+    } catch (err) {
+      figma.ui.postMessage({ type: 'error', message: err.message || 'Failed to analyze. Please try again.' });
+    }
+  }
 };
+
+function buildPrompt(payload) {
+  const { industry, competitors, depth } = payload;
+  const comps = competitors.split(/[\n,]+/).map(s => s.trim()).filter(Boolean).slice(0, 3);
+  const hasComp = comps.length > 0;
+  const dims = depth === "deep" 
+    ? ["Onboarding", "Navigation", "Visual Design", "Key Interactions", "Info Architecture", "Accessibility"]
+    : ["Onboarding", "Navigation", "Visual Design", "Key Interactions"];
+  
+  if (hasComp) {
+    const eg = comps.map(c => `"${c}":{"r":"Good","n":"5 words"}`).join(",");
+    return `Output ONLY valid JSON. No markdown, no explanation, no extra text.
+
+UX analysis of "${industry}". Compare: ${comps.join(", ")}.
+Ratings: Excellent|Good|Average|Poor|Weak. Keep ALL text values under 7 words.
+"rec" = specific design action for someone building a new product in this space.
+
+Schema:
+{"headline":"single punchy sentence max 20 words summarizing biggest opportunity","sum":"brief summary","scores":{"CompetitorName":0-100 per competitor},"comps":${JSON.stringify(comps)},"secs":[{"cat":"Onboarding","rows":[{"dim":"Sign-up","sc":{${eg}},"ins":"gap insight","rec":"your design recommendation"}]}],"opp":"market gap"}
+
+Include "scores" object with overall UX score 0-100 per competitor. Topics (one section each, two rows per section): ${dims.join(", ")}.
+JSON only:`;
+  }
+
+  return `Output ONLY valid JSON. No markdown, no explanation, no extra text.
+
+UX analysis of "${industry}" category.
+Ratings: Excellent|Good|Average|Poor|Weak. Keep ALL text values under 7 words.
+"rec" = one concrete design improvement a new product builder should implement.
+
+Schema:
+{"headline":"single punchy sentence max 20 words summarizing biggest opportunity","sum":"brief summary","category_score":0-100,"secs":[{"cat":"Onboarding","rows":[{"dim":"Sign-up","find":"current pattern","r":"Good","rec":"design recommendation"}]}],"opp":"market gap"}
+
+Include "category_score" with overall UX score 0-100 for the category. Topics (one section each, two rows per section): ${dims.join(", ")}.
+JSON only:`;
+}
 
 async function createReportFrame(data) {
   const frame = figma.createFrame();
