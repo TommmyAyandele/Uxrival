@@ -5,8 +5,14 @@ import { useSearchParams } from "next/navigation";
 const EMAIL_STORAGE_KEY = "uxrival_email";
 const WATCHLIST_STORAGE_KEY = "uxrival_watchlist";
 const THEME_STORAGE_KEY = "uxrival_theme";
+const TOUR_STORAGE_KEY = "uxrival_toured";
+const HISTORY_STORAGE_KEY = "uxrival_history";
+const PRO_STORAGE_KEY = "uxrival_pro";
+const BRANDING_STORAGE_KEY = "uxrival_branding";
 
 type WatchlistItem = { id: string; category: string; competitors: string; depth: string; email: string; frequency: string; savedAt: string };
+type HistoryItem = { id: string; category: string; competitors: string; depth: string; reportData: any; createdAt: string };
+type BrandingSettings = { logo: string; agencyName: string; accentColor: string };
 
 function loadWatchlist(): WatchlistItem[] {
   if (typeof window === "undefined") return [];
@@ -15,6 +21,38 @@ function loadWatchlist(): WatchlistItem[] {
     return raw ? JSON.parse(raw) : [];
   } catch {
     return [];
+  }
+}
+
+function loadHistory(): HistoryItem[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(HISTORY_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveHistory(items: HistoryItem[]) {
+  if (typeof window !== "undefined") {
+    localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(items));
+  }
+}
+
+function loadBranding(): BrandingSettings | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(BRANDING_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+function saveBranding(settings: BrandingSettings) {
+  if (typeof window !== "undefined") {
+    localStorage.setItem(BRANDING_STORAGE_KEY, JSON.stringify(settings));
   }
 }
 
@@ -134,6 +172,22 @@ const styles = `
     --accent-dim: rgba(200,184,0,0.08);
     --accent-glow: rgba(200,184,0,0.18);
   }
+  .thead { background: #f0f0f2; }
+  .tbody tr:nth-child(odd) { background: #ffffff; }
+  .tbody tr:nth-child(even) { background: #f8f8fa; }
+  .tbody tr:hover { background: #efefef; }
+  .sec-row td { background: #e8e8ec !important; color: #888; }
+  .modal-content { background: var(--surface); }
+  .modal-overlay { background: rgba(0,0,0,0.4); }
+  .summary-strip { background: var(--surface); border-color: var(--border); }
+  .table-outer { border-color: var(--border); }
+  .opp-band { background: rgba(180,160,0,0.08); }
+  .score-note { color: #888; }
+  td.text-cell { color: #555; }
+  td.rec-cell { color: #5a4fd6; }
+  .report-label { color: #8a7a00; }
+  .report-meta { color: #888; }
+  .modal-actions { background: var(--surface); border-top: 1px solid var(--border); }
   html { scroll-behavior: smooth; }
   body { background: var(--bg); color: var(--text); font-family: var(--font-d); -webkit-font-smoothing: antialiased; transition: background 0.2s, color 0.2s; }
   .page { max-width: 1120px; margin: 0 auto; padding: 0 28px 140px; }
@@ -328,15 +382,26 @@ const styles = `
   @media (max-width: 860px) { .hero-split { grid-template-columns: 1fr; gap: 36px; } .hero-right { position: static; } }
   @media (max-width: 640px) { .page { padding: 0 18px 100px; } .nav-links { display: none; } .nav-right .btn-primary { padding: 10px 18px; font-size: 13px; } .steps { grid-template-columns: 1fr; } .step:not(:last-child) { border-right: none; border-bottom: 1px solid var(--border); } .form-card { padding: 22px 18px; } .form-footer { flex-direction: column; align-items: stretch; } .radio-group { flex-direction: column; } .report-header { flex-direction: column; } .modal-actions { flex-wrap: wrap; } }
   @media print {
-    .nav, .hero-section, .form-card, .loading-state, .error-state, #learn, .site-footer { display: none !important; }
-    .modal-overlay { position: static !important; background: transparent !important; padding: 0; display: block !important; }
-    .modal-content { width: 100% !important; max-width: 100% !important; max-height: none !important; border: none !important; border-radius: 0 !important; box-shadow: none !important; }
-    .modal-close, .modal-actions, .view-toggle { display: none !important; }
-    table, .table-outer, .table-scroll { width: 100% !important; }
-    td, th { font-size: 12px !important; border: 1px solid #333 !important; }
-    table { border-collapse: collapse; }
-    tbody tr { page-break-inside: avoid; }
-    .summary-strip, .opp-band, .report-header { page-break-inside: avoid; }
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+    body > * { display: none !important; }
+    .modal-overlay { display: block !important; position: static !important; background: none !important; }
+    .modal-content { display: block !important; position: static !important; width: 100% !important; max-width: 100% !important; box-shadow: none !important; border-radius: 0 !important; border: none !important; }
+    .modal-actions { display: none !important; }
+    .modal-close { display: none !important; }
+    .view-toggle { display: none !important; }
+    .table-outer { width: 100% !important; overflow: visible !important; }
+    table { width: 100% !important; table-layout: fixed !important; font-size: 10px !important; }
+    td, th { word-wrap: break-word !important; overflow-wrap: break-word !important; padding: 6px 8px !important; }
+    th:nth-child(1), td:nth-child(1) { width: 14% !important; }
+    th:nth-child(2), td:nth-child(2) { width: 18% !important; }
+    th:nth-child(3), td:nth-child(3) { width: 18% !important; }
+    th:nth-child(4), td:nth-child(4) { width: 18% !important; }
+    th:nth-child(5), td:nth-child(5) { width: 22% !important; }
+    th:nth-child(6), td:nth-child(6) { width: 28% !important; }
+    tr { page-break-inside: avoid !important; }
+    .score-cards { display: flex !important; gap: 12px !important; margin-bottom: 16px !important; }
+    .score-card { padding: 10px 16px !important; }
+    @page { size: A4 landscape; margin: 15mm; }
   }
 `;
 
@@ -490,6 +555,231 @@ function HeatmapView({ data, myProduct }: { data: any; myProduct?: string }) {
   );
 }
 
+function TourTooltip({ 
+  step, 
+  total, 
+  title, 
+  description, 
+  onNext, 
+  onSkip, 
+  targetRef, 
+  isLast,
+  currentStep 
+}: { 
+  step: number; 
+  total: number; 
+  title: string; 
+  description: string; 
+  onNext: () => void; 
+  onSkip: () => void; 
+  targetRef: React.RefObject<any>; 
+  isLast: boolean; 
+  currentStep: number;
+}) {
+  const [position, setPosition] = useState({ top: 0, left: 0, arrow: "top" as "top" | "bottom" | "left" | "right" });
+
+  useEffect(() => {
+    const updatePosition = () => {
+      const target = targetRef.current;
+      if (!target) return;
+
+      const rect = target.getBoundingClientRect();
+      const tooltipWidth = 280;
+      const tooltipHeight = 120;
+      const padding = 20;
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+
+      let top = rect.bottom + padding;
+      let left = rect.left + rect.width / 2 - tooltipWidth / 2;
+      let arrow: "top" | "bottom" | "left" | "right" = "top";
+
+      // Check if tooltip goes off right edge
+      if (left + tooltipWidth > viewportWidth - padding) {
+        left = rect.right - tooltipWidth;
+        if (left < padding) left = padding;
+      }
+      // Check if tooltip goes off left edge
+      else if (left < padding) {
+        left = padding;
+      }
+
+      // Check if tooltip goes off bottom edge
+      if (top + tooltipHeight > viewportHeight - padding) {
+        // Try to position above
+        top = rect.top - tooltipHeight - padding;
+        arrow = "bottom";
+      }
+
+      // If still off screen, position to the side
+      if (top < padding) {
+        left = rect.right + padding;
+        top = rect.top + rect.height / 2 - tooltipHeight / 2;
+        arrow = "left";
+        
+        if (left + tooltipWidth > viewportWidth - padding) {
+          left = rect.left - tooltipWidth - padding;
+          arrow = "right";
+        }
+      }
+
+      setPosition({ top, left, arrow });
+    };
+
+    updatePosition();
+    window.addEventListener("resize", updatePosition);
+    window.addEventListener("scroll", updatePosition);
+    
+    return () => {
+      window.removeEventListener("resize", updatePosition);
+      window.removeEventListener("scroll", updatePosition);
+    };
+  }, [targetRef]);
+
+  useEffect(() => {
+    const target = targetRef.current;
+    if (!target) return;
+
+    // Add highlight ring
+    target.style.boxShadow = "0 0 0 4px var(--accent)";
+    target.style.transition = "box-shadow 0.2s";
+
+    return () => {
+      // Remove highlight ring
+      target.style.boxShadow = "";
+    };
+  }, [targetRef, currentStep]);
+
+  return (
+    <>
+      <div 
+        className="tour-overlay"
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: 9998,
+          backgroundColor: "rgba(0, 0, 0, 0.5)",
+        }}
+        onClick={onSkip}
+      />
+      <div
+        className="tour-tooltip"
+        style={{
+          position: "fixed",
+          top: position.top,
+          left: position.left,
+          zIndex: 9999,
+          background: "#1c1c20",
+          border: "1px solid var(--border-hover)",
+          borderRadius: "12px",
+          padding: "16px 20px",
+          maxWidth: "260px",
+          boxShadow: "0 8px 32px rgba(0, 0, 0, 0.4)",
+        }}
+      >
+        <div style={{ fontFamily: "var(--font-m)", fontSize: "10px", color: "var(--text-dim)", marginBottom: "8px" }}>
+          {step} of {total}
+        </div>
+        <div style={{ fontSize: "14px", fontWeight: "700", fontFamily: "var(--font-d)", marginBottom: "8px" }}>
+          {title}
+        </div>
+        <div style={{ fontSize: "12px", color: "var(--text-muted)", marginBottom: "16px", lineHeight: "1.5" }}>
+          {description}
+        </div>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+          <button
+            type="button"
+            className="btn-primary"
+            style={{ 
+              padding: "8px 16px", 
+              fontSize: "12px",
+              background: "var(--accent)",
+              color: "#090909",
+              border: "none",
+              borderRadius: "8px",
+              cursor: "pointer",
+              fontWeight: "700",
+              fontFamily: "var(--font-d)",
+            }}
+            onClick={(e) => { e.stopPropagation(); onNext(); }}
+          >
+            {isLast ? "Get Started →" : "Next →"}
+          </button>
+          <button
+            type="button"
+            style={{
+              background: "none",
+              border: "none",
+              color: "var(--text-dim)",
+              fontSize: "11px",
+              cursor: "pointer",
+              fontFamily: "var(--font-m)",
+            }}
+            onClick={(e) => { e.stopPropagation(); onSkip(); }}
+          >
+            Skip tour
+          </button>
+        </div>
+        {position.arrow === "top" && (
+          <div style={{
+            position: "absolute",
+            top: "-8px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: 0,
+            height: 0,
+            borderLeft: "8px solid transparent",
+            borderRight: "8px solid transparent",
+            borderBottom: "8px solid #1c1c20",
+          }} />
+        )}
+        {position.arrow === "bottom" && (
+          <div style={{
+            position: "absolute",
+            bottom: "-8px",
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: 0,
+            height: 0,
+            borderLeft: "8px solid transparent",
+            borderRight: "8px solid transparent",
+            borderTop: "8px solid #1c1c20",
+          }} />
+        )}
+        {position.arrow === "left" && (
+          <div style={{
+            position: "absolute",
+            left: "-8px",
+            top: "50%",
+            transform: "translateY(-50%)",
+            width: 0,
+            height: 0,
+            borderTop: "8px solid transparent",
+            borderBottom: "8px solid transparent",
+            borderRight: "8px solid #1c1c20",
+          }} />
+        )}
+        {position.arrow === "right" && (
+          <div style={{
+            position: "absolute",
+            right: "-8px",
+            top: "50%",
+            transform: "translateY(-50%)",
+            width: 0,
+            height: 0,
+            borderTop: "8px solid transparent",
+            borderBottom: "8px solid transparent",
+            borderLeft: "8px solid #1c1c20",
+          }} />
+        )}
+      </div>
+    </>
+  );
+}
+
 function IndustryDropdown({ value, customValue, onChange, onCustomChange }: {
   value: string; customValue: string; onChange: (v: string) => void; onCustomChange: (v: string) => void;
 }) {
@@ -539,6 +829,15 @@ function IndustryDropdown({ value, customValue, onChange, onCustomChange }: {
 export default function UXRival() {
   const searchParams = useSearchParams();
   const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const [showTour, setShowTour] = useState(false);
+  const [tourStep, setTourStep] = useState(0);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [showWhiteLabelModal, setShowWhiteLabelModal] = useState(false);
+  const [branding, setBranding] = useState<BrandingSettings | null>(null);
+  const [isPro, setIsPro] = useState(false);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [tempBranding, setTempBranding] = useState<BrandingSettings>({ logo: "", agencyName: "", accentColor: "#e8ff47" });
   const [industry, setIndustry] = useState("");
   const [customCategory, setCustomCategory] = useState("");
   const [competitors, setCompetitors] = useState("");
@@ -565,8 +864,40 @@ export default function UXRival() {
   const effectiveCategory = industry === "custom" ? customCategory : industry;
   const canSubmit = !loading && (industry === "custom" ? customCategory.trim().length > 0 : industry.length > 0) && (analysisMode !== "myProduct" || myProduct.trim().length > 0);
 
+  // Refs for tour targets
+  const industryRef = useRef<HTMLDivElement>(null);
+  const competitorsRef = useRef<HTMLTextAreaElement>(null);
+  const focusAreasRef = useRef<HTMLTextAreaElement>(null);
+  const generateBtnRef = useRef<HTMLButtonElement>(null);
+
+  const tourSteps = [
+    {
+      title: "Pick your industry",
+      description: "Choose from 30+ categories or type your own niche",
+      target: industryRef,
+    },
+    {
+      title: "Add competitors", 
+      description: "Name up to 3 products you want to benchmark against",
+      target: competitorsRef,
+    },
+    {
+      title: "Set focus areas",
+      description: "Optional — tell AI which UX dimensions matter most to you", 
+      target: focusAreasRef,
+    },
+    {
+      title: "Generate your report",
+      description: "Get instant scores, heatmaps and actionable recommendations",
+      target: generateBtnRef,
+    },
+  ];
+
   useEffect(() => {
     setWatchlist(loadWatchlist());
+    setHistory(loadHistory());
+    setBranding(loadBranding());
+    setIsPro(localStorage.getItem(PRO_STORAGE_KEY) === "true");
   }, []);
 
   useEffect(() => {
@@ -589,8 +920,105 @@ export default function UXRival() {
     }
   }, [theme]);
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const hasToured = localStorage.getItem(TOUR_STORAGE_KEY);
+      if (!hasToured) {
+        setShowTour(true);
+        setTourStep(0);
+      }
+    }
+  }, []);
+
   const toggleTheme = () => {
     setTheme(theme === "dark" ? "light" : "dark");
+  };
+
+  const handleTourNext = () => {
+    if (tourStep < tourSteps.length - 1) {
+      setTourStep(tourStep + 1);
+    } else {
+      setShowTour(false);
+      if (typeof window !== "undefined") {
+        localStorage.setItem(TOUR_STORAGE_KEY, "true");
+      }
+    }
+  };
+
+  const handleTourSkip = () => {
+    setShowTour(false);
+    if (typeof window !== "undefined") {
+      localStorage.setItem(TOUR_STORAGE_KEY, "true");
+    }
+  };
+
+  const saveToHistory = (data: any) => {
+    const newItem: HistoryItem = {
+      id: crypto.randomUUID(),
+      category: effectiveCategory,
+      competitors,
+      depth,
+      reportData: data,
+      createdAt: new Date().toISOString(),
+    };
+    
+    const currentHistory = loadHistory();
+    const updatedHistory = [newItem, ...currentHistory].slice(0, 10);
+    setHistory(updatedHistory);
+    saveHistory(updatedHistory);
+  };
+
+  const deleteHistoryItem = (id: string) => {
+    const currentHistory = loadHistory();
+    const updatedHistory = currentHistory.filter(item => item.id !== id);
+    setHistory(updatedHistory);
+    saveHistory(updatedHistory);
+  };
+
+  const viewHistoryReport = (item: HistoryItem) => {
+    setReportData(item.reportData);
+    setShowHistoryModal(false);
+  };
+
+  const rerunAnalysis = (item: HistoryItem) => {
+    setShowHistoryModal(false);
+    setIndustry(item.category);
+    setCompetitors(item.competitors);
+    setDepth(item.depth);
+    // Scroll to form
+    document.getElementById("form")?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const getTimeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+    
+    if (diffHours < 1) return "Just now";
+    if (diffHours < 24) return `${diffHours} hour${diffHours === 1 ? "" : "s"} ago`;
+    if (diffDays < 7) return `${diffDays} day${diffDays === 1 ? "" : "s"} ago`;
+    return `${diffDays} day${diffDays === 1 ? "" : "s"} ago`;
+  };
+
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith("image/")) {
+      setLogoFile(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setTempBranding({ ...tempBranding, logo: e.target?.result as string });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const saveBrandingSettings = () => {
+    saveBranding(tempBranding);
+    setBranding(tempBranding);
+    setToastMsg("Branding saved ✓");
+    setTimeout(() => setToastMsg(""), 3000);
   };
 
   const handleStartWatching = () => {
@@ -665,6 +1093,10 @@ export default function UXRival() {
       const start = raw.indexOf("{"); const end = raw.lastIndexOf("}");
       if (start === -1 || end === -1) throw new Error(`No JSON found.`);
       const data = JSON.parse(raw.slice(start, end + 1));
+      
+      // Save to history
+      saveToHistory(data);
+      
       if (typeof window !== "undefined" && localStorage.getItem(EMAIL_STORAGE_KEY)) {
         setReportData(data);
       } else {
@@ -718,8 +1150,10 @@ export default function UXRival() {
               <span className="nav-link" onClick={scrollToLearn}>Features</span>
               <span className="nav-link" onClick={scrollToLearn}>How it works</span>
               <span className="nav-link" onClick={scrollToLearn}>Who it&apos;s for</span>
+              <span className="nav-link" onClick={() => setShowHistoryModal(true)} style={{ display: "flex", alignItems: "center" }}>History{history.length > 0 && <span className="nav-badge" style={{ background: "var(--surface2)", color: "var(--text-muted)" }}>{history.length}</span>}</span>
               <span className="nav-link" onClick={() => setShowWatchlistModal(true)} style={{ display: "flex", alignItems: "center" }}>Watchlist{watchlist.length > 0 && <span className="nav-badge">{watchlist.length}</span>}</span>
             </div>
+            <button type="button" className="btn-secondary" onClick={() => setShowWhiteLabelModal(true)} style={{ display: "flex", alignItems: "center", gap: "6px" }}>White Label{!isPro && <span className="nav-badge" style={{ background: "rgba(245,197,24,0.1)", color: "#f5c518", border: "1px solid rgba(245,197,24,0.2)" }}>PRO</span>}</button>
             <div className="theme-toggle">
               <button type="button" className={`theme-toggle-option${theme === "dark" ? " active" : ""}`} onClick={() => setTheme("dark")}>Dark</button>
               <button type="button" className={`theme-toggle-option${theme === "light" ? " active" : ""}`} onClick={() => setTheme("light")}>Light</button>
@@ -758,15 +1192,17 @@ export default function UXRival() {
                 )}
                 <div className="form-row">
                   <span className="field-label">Industry or Niche</span>
-                  <IndustryDropdown value={industry} customValue={customCategory} onChange={setIndustry} onCustomChange={setCustomCategory} />
+                  <div ref={industryRef}>
+                    <IndustryDropdown value={industry} customValue={customCategory} onChange={setIndustry} onCustomChange={setCustomCategory} />
+                  </div>
                 </div>
                 <div className="form-row">
                   <span className="field-label">Competitors <span style={{ color: "var(--text-dim)", fontWeight: 400 }}>(optional · up to 3)</span></span>
-                  <textarea placeholder={"Paystack\nFlutterwave\nStripe"} value={competitors} onChange={(e) => setCompetitors(e.target.value)} />
+                  <textarea ref={competitorsRef} placeholder={"Paystack\nFlutterwave\nStripe"} value={competitors} onChange={(e) => setCompetitors(e.target.value)} />
                 </div>
                 <div className="form-row">
                   <span className="field-label">Focus Areas <span style={{ color: "var(--text-dim)", fontWeight: 400 }}>(optional)</span></span>
-                  <textarea placeholder="e.g. checkout flow, empty states, error handling" value={focusAreas} onChange={(e) => setFocusAreas(e.target.value)} />
+                  <textarea ref={focusAreasRef} placeholder="e.g. checkout flow, empty states, error handling" value={focusAreas} onChange={(e) => setFocusAreas(e.target.value)} />
                 </div>
                 <div className="form-row">
                   <span className="field-label">Report Depth</span>
@@ -783,7 +1219,7 @@ export default function UXRival() {
                 </div>
                 <div className="form-footer">
                   <span className="form-hint">Powered by Claude Sonnet</span>
-                  <button className="btn-primary" onClick={handleGenerate} disabled={!canSubmit}>{loading ? "Analyzing..." : "Generate Analysis →"}</button>
+                  <button className="btn-primary" ref={generateBtnRef} onClick={handleGenerate} disabled={!canSubmit}>{loading ? "Analyzing..." : "Generate Analysis →"}</button>
                 </div>
               </div>
             </div>
@@ -816,7 +1252,16 @@ export default function UXRival() {
               <div className="modal-header">
                 <div className="report-header">
                   <div className="report-title-block">
-                    <div className="report-label">// analysis complete</div>
+                    <div className="report-label">
+                      {branding ? (
+                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                          {branding.logo && <img src={branding.logo} alt="Logo" style={{ height: "16px" }} />}
+                          <span>{branding.agencyName || "Analysis Complete"}</span>
+                        </div>
+                      ) : (
+                        "// analysis complete"
+                      )}
+                    </div>
                     <div className="report-title">{effectiveCategory || (reportData?.sum ? reportData.sum.slice(0, 60) + (reportData.sum.length > 60 ? "…" : "") : "Shared Report")}</div>
                     <div className="report-meta">{depth === "quick" ? "Quick Scan" : "Deep Teardown"}{reportData.comps?.length > 0 && ` · comparing ${reportData.comps.join(", ")}`}</div>
                   </div>
@@ -828,7 +1273,16 @@ export default function UXRival() {
                   <button type="button" className={`view-toggle-btn${reportViewMode === "heatmap" ? " active" : ""}`} onClick={() => setReportViewMode("heatmap")}>Heatmap View</button>
                 </div>
                 {reportViewMode === "table" ? <ReportTable data={reportData} myProduct={analysisMode === "myProduct" ? myProduct : undefined} /> : <HeatmapView data={reportData} myProduct={analysisMode === "myProduct" ? myProduct : undefined} />}
-                <div className="form-hint" style={{ marginTop: 32, textAlign: "center" }}>Generated by UXRival.com — Free AI UX Analysis</div>
+                <div className="form-hint" style={{ marginTop: 32, textAlign: "center" }}>
+                  {branding ? (
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
+                      {branding.logo && <img src={branding.logo} alt="Logo" style={{ height: "16px" }} />}
+                      <span>Generated by {branding.agencyName || "Agency"}</span>
+                    </div>
+                  ) : (
+                    "Generated by UXRival.com — Free AI UX Analysis"
+                  )}
+                </div>
               </div>
               {showWatchForm && (
                 <div className="watch-form-inline">
@@ -914,6 +1368,42 @@ export default function UXRival() {
         </footer>
       </div>
 
+      {showHistoryModal && (
+        <div className="modal-overlay" onClick={() => setShowHistoryModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 680 }}>
+            <button type="button" className="modal-close" onClick={() => setShowHistoryModal(false)} aria-label="Close">×</button>
+            <div className="modal-header">
+              <div className="report-title">Analysis History</div>
+            </div>
+            <div className="modal-scroll">
+              {history.length === 0 ? (
+                <p className="form-hint" style={{ padding: 24 }}>No analyses saved yet. Run your first analysis to see it here.</p>
+              ) : (
+                <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  {history.map((item) => (
+                    <div key={item.id} className="feature-card" style={{ padding: 20 }}>
+                      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, flexWrap: "wrap" }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div className="report-title" style={{ fontSize: 15, marginBottom: 6 }}>{item.category}</div>
+                          {item.competitors.trim() && <div className="form-hint" style={{ marginBottom: 6 }}>{item.competitors.split(/[\n,]+/).map((s: string) => s.trim()).filter(Boolean).join(", ") || "—"}</div>}
+                          <div className="form-hint" style={{ fontSize: 11, color: "var(--text-dim)" }}>{getTimeAgo(item.createdAt)}</div>
+                        </div>
+                        <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
+                          <button type="button" className="btn-secondary" onClick={() => viewHistoryReport(item)}>View Report</button>
+                          <button type="button" className="btn-secondary" onClick={() => rerunAnalysis(item)}>Re-run</button>
+                          <button type="button" className="btn-secondary" onClick={() => deleteHistoryItem(item.id)} style={{ padding: "8px 12px", fontSize: 14 }}>🗑</button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <p className="form-hint" style={{ marginTop: 24, textAlign: "center", fontSize: 11 }}>History is saved on this device only</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {showWatchlistModal && (
         <div className="modal-overlay" onClick={() => setShowWatchlistModal(false)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 560 }}>
@@ -923,7 +1413,12 @@ export default function UXRival() {
             </div>
             <div className="modal-scroll">
               {watchlist.length === 0 ? (
-                <p className="form-hint" style={{ padding: 24 }}>No spaces watched yet. Run an analysis and click Watch this space.</p>
+                <div style={{ padding: "60px 40px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
+                  <div style={{ fontSize: "48px", color: "var(--text-dim)" }}>👁</div>
+                  <div style={{ fontSize: "18px", fontFamily: "var(--font-d)", fontWeight: "700", marginBottom: "8px" }}>No spaces watched yet</div>
+                  <div style={{ fontSize: "13px", color: "var(--text-muted)", maxWidth: "320px", lineHeight: "1.5", margin: "0 auto" }}>Run an analysis and click Get Weekly Updates to monitor a product category. We'll email you when things change.</div>
+                  <button type="button" className="btn-primary" onClick={() => { setShowWatchlistModal(false); scrollToForm(); }}>Run your first analysis →</button>
+                </div>
               ) : (
                 <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
                   {watchlist.map((item) => (
@@ -952,7 +1447,131 @@ export default function UXRival() {
         </div>
       )}
 
+      {showWhiteLabelModal && (
+        <div className="modal-overlay" onClick={() => setShowWhiteLabelModal(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 520 }}>
+            <button type="button" className="modal-close" onClick={() => setShowWhiteLabelModal(false)} aria-label="Close">×</button>
+            <div className="modal-header">
+              <div className="report-title">White Label</div>
+            </div>
+            <div className="modal-scroll">
+              {!isPro ? (
+                <div style={{ padding: "20px 0" }}>
+                  {/* Preview with blur */}
+                  <div style={{ 
+                    background: "var(--surface)", 
+                    border: "1px solid var(--border)", 
+                    borderRadius: "12px", 
+                    padding: "16px 20px", 
+                    marginBottom: "24px",
+                    filter: "blur(2px)",
+                    opacity: "0.7"
+                  }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+                      <div style={{ width: "24px", height: "16px", background: "var(--accent)", borderRadius: "4px" }} />
+                      <span style={{ fontSize: "14px", fontWeight: "600" }}>Your Agency Name</span>
+                    </div>
+                    <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>UX Analysis Report</div>
+                  </div>
+                  
+                  <h2 style={{ fontSize: "20px", fontWeight: "700", marginBottom: "12px" }}>Put your brand on every report</h2>
+                  <p style={{ fontSize: "14px", color: "var(--text-muted)", lineHeight: "1.6", marginBottom: "24px" }}>
+                    Upload your logo and agency name — every exported report and shared link will show your branding instead of UX Rival.
+                  </p>
+                  
+                  <button 
+                    type="button" 
+                    className="btn-primary" 
+                    style={{ width: "100%", marginBottom: "12px" }}
+                    onClick={() => window.location.href = "/api/checkout"}
+                  >
+                    Unlock White Label — $9/mo →
+                  </button>
+                  
+                  <p style={{ fontSize: "11px", color: "var(--text-dim)", textAlign: "center" }}>
+                    One-time setup · Cancel anytime
+                  </p>
+                </div>
+              ) : (
+                <div style={{ padding: "20px 0" }}>
+                  <div className="form-row">
+                    <span className="field-label">Agency Logo</span>
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      onChange={handleLogoUpload}
+                      style={{ width: "100%", background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 10, padding: "13px 16px" }}
+                    />
+                  </div>
+                  
+                  <div className="form-row">
+                    <span className="field-label">Agency Name</span>
+                    <input 
+                      type="text" 
+                      placeholder="Your Agency Name"
+                      value={tempBranding.agencyName}
+                      onChange={(e) => setTempBranding({ ...tempBranding, agencyName: e.target.value })}
+                      style={{ width: "100%" }}
+                    />
+                  </div>
+                  
+                  <div className="form-row">
+                    <span className="field-label">Accent Color</span>
+                    <input 
+                      type="color" 
+                      value={tempBranding.accentColor}
+                      onChange={(e) => setTempBranding({ ...tempBranding, accentColor: e.target.value })}
+                      style={{ width: "100%", height: "44px", background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 10, cursor: "pointer" }}
+                    />
+                  </div>
+                  
+                  {/* Preview */}
+                  <div style={{ 
+                    background: "var(--surface)", 
+                    border: "1px solid var(--border)", 
+                    borderRadius: "12px", 
+                    padding: "16px 20px", 
+                    marginBottom: "24px"
+                  }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
+                      {tempBranding.logo && <img src={tempBranding.logo} alt="Logo" style={{ height: "16px" }} />}
+                      <span style={{ fontSize: "14px", fontWeight: "600", color: tempBranding.accentColor }}>
+                        {tempBranding.agencyName || "Your Agency Name"}
+                      </span>
+                    </div>
+                    <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>UX Analysis Report</div>
+                  </div>
+                  
+                  <button 
+                    type="button" 
+                    className="btn-primary" 
+                    onClick={saveBrandingSettings}
+                    style={{ width: "100%" }}
+                  >
+                    Save Branding
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       {toastMsg && <div className="toast">{toastMsg}</div>}
+      
+      {showTour && tourStep < tourSteps.length && (
+        <TourTooltip
+          step={tourStep + 1}
+          total={tourSteps.length}
+          title={tourSteps[tourStep].title}
+          description={tourSteps[tourStep].description}
+          onNext={handleTourNext}
+          onSkip={handleTourSkip}
+          targetRef={tourSteps[tourStep].target}
+          isLast={tourStep === tourSteps.length - 1}
+          currentStep={tourStep}
+        />
+      )}
     </>
   );
 }
