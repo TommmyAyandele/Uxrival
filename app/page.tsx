@@ -7,12 +7,9 @@ const WATCHLIST_STORAGE_KEY = "uxrival_watchlist";
 const THEME_STORAGE_KEY = "uxrival_theme";
 const TOUR_STORAGE_KEY = "uxrival_toured";
 const HISTORY_STORAGE_KEY = "uxrival_history";
-const PRO_STORAGE_KEY = "uxrival_pro";
-const BRANDING_STORAGE_KEY = "uxrival_branding";
 
 type WatchlistItem = { id: string; category: string; competitors: string; depth: string; email: string; frequency: string; savedAt: string };
 type HistoryItem = { id: string; category: string; competitors: string; depth: string; reportData: any; createdAt: string };
-type BrandingSettings = { logo: string; agencyName: string; accentColor: string };
 
 function loadWatchlist(): WatchlistItem[] {
   if (typeof window === "undefined") return [];
@@ -37,22 +34,6 @@ function loadHistory(): HistoryItem[] {
 function saveHistory(items: HistoryItem[]) {
   if (typeof window !== "undefined") {
     localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(items));
-  }
-}
-
-function loadBranding(): BrandingSettings | null {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = localStorage.getItem(BRANDING_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch {
-    return null;
-  }
-}
-
-function saveBranding(settings: BrandingSettings) {
-  if (typeof window !== "undefined") {
-    localStorage.setItem(BRANDING_STORAGE_KEY, JSON.stringify(settings));
   }
 }
 
@@ -833,11 +814,6 @@ export default function UXRival() {
   const [tourStep, setTourStep] = useState(0);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [history, setHistory] = useState<HistoryItem[]>([]);
-  const [showWhiteLabelModal, setShowWhiteLabelModal] = useState(false);
-  const [branding, setBranding] = useState<BrandingSettings | null>(null);
-  const [isPro, setIsPro] = useState(false);
-  const [logoFile, setLogoFile] = useState<File | null>(null);
-  const [tempBranding, setTempBranding] = useState<BrandingSettings>({ logo: "", agencyName: "", accentColor: "#e8ff47" });
   const [industry, setIndustry] = useState("");
   const [customCategory, setCustomCategory] = useState("");
   const [competitors, setCompetitors] = useState("");
@@ -896,8 +872,6 @@ export default function UXRival() {
   useEffect(() => {
     setWatchlist(loadWatchlist());
     setHistory(loadHistory());
-    setBranding(loadBranding());
-    setIsPro(localStorage.getItem(PRO_STORAGE_KEY) === "true");
   }, []);
 
   useEffect(() => {
@@ -1002,25 +976,6 @@ export default function UXRival() {
     return `${diffDays} day${diffDays === 1 ? "" : "s"} ago`;
   };
 
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file && file.type.startsWith("image/")) {
-      setLogoFile(file);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setTempBranding({ ...tempBranding, logo: e.target?.result as string });
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const saveBrandingSettings = () => {
-    saveBranding(tempBranding);
-    setBranding(tempBranding);
-    setToastMsg("Branding saved ✓");
-    setTimeout(() => setToastMsg(""), 3000);
-  };
-
   const handleStartWatching = () => {
     const email = watchEmail.trim();
     if (!email) return;
@@ -1056,10 +1011,11 @@ export default function UXRival() {
         body: JSON.stringify({ email: item.email, category: item.category, competitors: item.competitors, depth: item.depth, frequency: item.frequency }),
       });
       const data = await res.json();
-      if (data.success) setToastMsg("Report sent ✓");
-      else setToastMsg("Failed to send");
-    } catch {
-      setToastMsg("Failed to send");
+      if (data.success) setToastMsg("Report sent to your email ✓");
+      else setToastMsg("Failed to send — try again");
+    } catch (err: any) {
+      console.error("Send now error:", err);
+      setToastMsg("Failed to send — try again");
     }
     setTimeout(() => { setToastMsg(""); setSendNowId(null); }, 3000);
   };
@@ -1153,7 +1109,6 @@ export default function UXRival() {
               <span className="nav-link" onClick={() => setShowHistoryModal(true)} style={{ display: "flex", alignItems: "center" }}>History{history.length > 0 && <span className="nav-badge" style={{ background: "var(--surface2)", color: "var(--text-muted)" }}>{history.length}</span>}</span>
               <span className="nav-link" onClick={() => setShowWatchlistModal(true)} style={{ display: "flex", alignItems: "center" }}>Watchlist{watchlist.length > 0 && <span className="nav-badge">{watchlist.length}</span>}</span>
             </div>
-            <button type="button" className="btn-secondary" onClick={() => setShowWhiteLabelModal(true)} style={{ display: "flex", alignItems: "center", gap: "6px" }}>White Label{!isPro && <span className="nav-badge" style={{ background: "rgba(245,197,24,0.1)", color: "#f5c518", border: "1px solid rgba(245,197,24,0.2)" }}>PRO</span>}</button>
             <div className="theme-toggle">
               <button type="button" className={`theme-toggle-option${theme === "dark" ? " active" : ""}`} onClick={() => setTheme("dark")}>Dark</button>
               <button type="button" className={`theme-toggle-option${theme === "light" ? " active" : ""}`} onClick={() => setTheme("light")}>Light</button>
@@ -1252,16 +1207,7 @@ export default function UXRival() {
               <div className="modal-header">
                 <div className="report-header">
                   <div className="report-title-block">
-                    <div className="report-label">
-                      {branding ? (
-                        <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-                          {branding.logo && <img src={branding.logo} alt="Logo" style={{ height: "16px" }} />}
-                          <span>{branding.agencyName || "Analysis Complete"}</span>
-                        </div>
-                      ) : (
-                        "// analysis complete"
-                      )}
-                    </div>
+                    <div className="report-label">// analysis complete</div>
                     <div className="report-title">{effectiveCategory || (reportData?.sum ? reportData.sum.slice(0, 60) + (reportData.sum.length > 60 ? "…" : "") : "Shared Report")}</div>
                     <div className="report-meta">{depth === "quick" ? "Quick Scan" : "Deep Teardown"}{reportData.comps?.length > 0 && ` · comparing ${reportData.comps.join(", ")}`}</div>
                   </div>
@@ -1273,16 +1219,7 @@ export default function UXRival() {
                   <button type="button" className={`view-toggle-btn${reportViewMode === "heatmap" ? " active" : ""}`} onClick={() => setReportViewMode("heatmap")}>Heatmap View</button>
                 </div>
                 {reportViewMode === "table" ? <ReportTable data={reportData} myProduct={analysisMode === "myProduct" ? myProduct : undefined} /> : <HeatmapView data={reportData} myProduct={analysisMode === "myProduct" ? myProduct : undefined} />}
-                <div className="form-hint" style={{ marginTop: 32, textAlign: "center" }}>
-                  {branding ? (
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "8px" }}>
-                      {branding.logo && <img src={branding.logo} alt="Logo" style={{ height: "16px" }} />}
-                      <span>Generated by {branding.agencyName || "Agency"}</span>
-                    </div>
-                  ) : (
-                    "Generated by UXRival.com — Free AI UX Analysis"
-                  )}
-                </div>
+                <div className="form-hint" style={{ marginTop: 32, textAlign: "center" }}>Generated by UXRival.com — Free AI UX Analysis</div>
               </div>
               {showWatchForm && (
                 <div className="watch-form-inline">
@@ -1440,116 +1377,6 @@ export default function UXRival() {
                       </div>
                     </div>
                   ))}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showWhiteLabelModal && (
-        <div className="modal-overlay" onClick={() => setShowWhiteLabelModal(false)}>
-          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 520 }}>
-            <button type="button" className="modal-close" onClick={() => setShowWhiteLabelModal(false)} aria-label="Close">×</button>
-            <div className="modal-header">
-              <div className="report-title">White Label</div>
-            </div>
-            <div className="modal-scroll">
-              {!isPro ? (
-                <div style={{ padding: "20px 0" }}>
-                  {/* Preview with blur */}
-                  <div style={{ 
-                    background: "var(--surface)", 
-                    border: "1px solid var(--border)", 
-                    borderRadius: "12px", 
-                    padding: "16px 20px", 
-                    marginBottom: "24px",
-                    filter: "blur(2px)",
-                    opacity: "0.7"
-                  }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
-                      <div style={{ width: "24px", height: "16px", background: "var(--accent)", borderRadius: "4px" }} />
-                      <span style={{ fontSize: "14px", fontWeight: "600" }}>Your Agency Name</span>
-                    </div>
-                    <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>UX Analysis Report</div>
-                  </div>
-                  
-                  <h2 style={{ fontSize: "20px", fontWeight: "700", marginBottom: "12px" }}>Put your brand on every report</h2>
-                  <p style={{ fontSize: "14px", color: "var(--text-muted)", lineHeight: "1.6", marginBottom: "24px" }}>
-                    Upload your logo and agency name — every exported report and shared link will show your branding instead of UX Rival.
-                  </p>
-                  
-                  <button 
-                    type="button" 
-                    className="btn-primary" 
-                    style={{ width: "100%", marginBottom: "12px" }}
-                    onClick={() => window.location.href = "/api/checkout"}
-                  >
-                    Unlock White Label — $9/mo →
-                  </button>
-                  
-                  <p style={{ fontSize: "11px", color: "var(--text-dim)", textAlign: "center" }}>
-                    One-time setup · Cancel anytime
-                  </p>
-                </div>
-              ) : (
-                <div style={{ padding: "20px 0" }}>
-                  <div className="form-row">
-                    <span className="field-label">Agency Logo</span>
-                    <input 
-                      type="file" 
-                      accept="image/*" 
-                      onChange={handleLogoUpload}
-                      style={{ width: "100%", background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 10, padding: "13px 16px" }}
-                    />
-                  </div>
-                  
-                  <div className="form-row">
-                    <span className="field-label">Agency Name</span>
-                    <input 
-                      type="text" 
-                      placeholder="Your Agency Name"
-                      value={tempBranding.agencyName}
-                      onChange={(e) => setTempBranding({ ...tempBranding, agencyName: e.target.value })}
-                      style={{ width: "100%" }}
-                    />
-                  </div>
-                  
-                  <div className="form-row">
-                    <span className="field-label">Accent Color</span>
-                    <input 
-                      type="color" 
-                      value={tempBranding.accentColor}
-                      onChange={(e) => setTempBranding({ ...tempBranding, accentColor: e.target.value })}
-                      style={{ width: "100%", height: "44px", background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 10, cursor: "pointer" }}
-                    />
-                  </div>
-                  
-                  {/* Preview */}
-                  <div style={{ 
-                    background: "var(--surface)", 
-                    border: "1px solid var(--border)", 
-                    borderRadius: "12px", 
-                    padding: "16px 20px", 
-                    marginBottom: "24px"
-                  }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" }}>
-                      {tempBranding.logo && <img src={tempBranding.logo} alt="Logo" style={{ height: "16px" }} />}
-                      <span style={{ fontSize: "14px", fontWeight: "600", color: tempBranding.accentColor }}>
-                        {tempBranding.agencyName || "Your Agency Name"}
-                      </span>
-                    </div>
-                    <div style={{ fontSize: "12px", color: "var(--text-muted)" }}>UX Analysis Report</div>
-                  </div>
-                  
-                  <button 
-                    type="button" 
-                    className="btn-primary" 
-                    onClick={saveBrandingSettings}
-                    style={{ width: "100%" }}
-                  >
-                    Save Branding
-                  </button>
                 </div>
               )}
             </div>

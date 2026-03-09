@@ -106,7 +106,7 @@ export async function POST(req: NextRequest) {
 
     const ai = new GoogleGenAI({ apiKey: geminiKey });
     const res = await ai.models.generateContent({
-      model: "gemini-3.1-flash-lite-preview",
+      model: "gemini-2.0-flash-lite",
       contents: [{ role: "user", parts: [{ text: buildPrompt(category, competitors || "", depth || "quick") }] }],
     });
 
@@ -124,7 +124,7 @@ export async function POST(req: NextRequest) {
     await resend.emails.send({
       from: "UX Rival <onboarding@resend.dev>",
       to: email,
-      subject: `UX Report: ${category}`,
+      subject: `Your UX Rival update — ${category}`,
       html,
     });
 
