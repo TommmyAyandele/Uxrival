@@ -1133,20 +1133,21 @@ export default function UXRival() {
           </div>
         </nav>
 
-        <section className="hero-section">
-          <div className="hero-split">
-            <div className="hero-left">
-              <div className="hero-kicker">AI-powered UX intelligence</div>
-              <h1 className="hero-h1">Know where your<br /><em>competitors</em><br />are failing</h1>
-              <p className="hero-sub">Instant structured teardowns, UX scoring, heatmaps and weekly monitoring for any product category. Built for designers and agencies who move fast.</p>
-              <div className="hero-trust">
-                <span className="trust-item">⚡ Results in ~10s</span><span className="trust-sep">·</span>
-                <span className="trust-item">30+ industries</span><span className="trust-sep">·</span>
-                <span className="trust-item">UX Scoring</span><span className="trust-sep">·</span>
-                <span className="trust-item">Weekly Alerts</span><span className="trust-sep">·</span>
-                <span className="trust-item">Free · No signup</span>
+        <main>
+          <section className="hero-section">
+            <div className="hero-split">
+              <div className="hero-left">
+                <div className="hero-kicker">AI-powered UX intelligence</div>
+                <h1 className="hero-h1">Know where your<br /><em>competitors</em><br />are failing</h1>
+                <p className="hero-sub">Instant structured teardowns, UX scoring, heatmaps and weekly monitoring for any product category. Built for designers and agencies who move fast.</p>
+                <div className="hero-trust">
+                  <span className="trust-item">⚡ Results in ~10s</span><span className="trust-sep">·</span>
+                  <span className="trust-item">30+ industries</span><span className="trust-sep">·</span>
+                  <span className="trust-item">UX Scoring</span><span className="trust-sep">·</span>
+                  <span className="trust-item">Weekly Alerts</span><span className="trust-sep">·</span>
+                  <span className="trust-item">Free · No signup</span>
+                </div>
               </div>
-            </div>
             <div className="hero-right" id="form">
               <div className="form-card">
                 <div className="form-row">
@@ -1319,6 +1320,7 @@ export default function UXRival() {
           <div className="footer-logo">UX<span>Rival</span></div>
           <div className="footer-copy">Built for designers who ship · Powered by Claude</div>
         </footer>
+        </main>
       </div>
 
       {showHistoryModal && (
