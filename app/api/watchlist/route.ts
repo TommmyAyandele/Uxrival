@@ -1,42 +1,5 @@
-import { GoogleGenAI } from "@google/genai";
 import { Resend } from "resend";
 import { NextRequest, NextResponse } from "next/server";
-
-function buildPrompt(category: string, competitorList: string, depth: string) {
-  const comps = competitorList.split(/[\n,]+/).map((s) => s.trim()).filter(Boolean).slice(0, 3);
-  const hasComp = comps.length > 0;
-  const dims =
-    depth === "deep"
-      ? ["Onboarding", "Navigation", "Visual Design", "Key Interactions", "Info Architecture", "Accessibility"]
-      : ["Onboarding", "Navigation", "Visual Design", "Key Interactions"];
-
-  if (hasComp) {
-    const eg = comps.map((c) => `"${c}":{"r":"Good","n":"5 words"}`).join(",");
-    return `Output ONLY valid JSON. No markdown, no explanation, no extra text.
-
-UX analysis of "${category}". Compare: ${comps.join(", ")}.
-Ratings: Excellent|Good|Average|Poor|Weak. Keep ALL text values under 7 words.
-"rec" = specific design action for someone building a new product in this space.
-
-Schema:
-{"headline":"single punchy sentence max 20 words summarizing biggest opportunity","sum":"brief summary","scores":{"CompetitorName":0-100 per competitor},"comps":${JSON.stringify(comps)},"secs":[{"cat":"Onboarding","rows":[{"dim":"Sign-up","sc":{${eg}},"ins":"gap insight","rec":"your design recommendation"}]}],"opp":"market gap"}
-
-Include "scores" object with overall UX score 0-100 per competitor. Topics (one section each, two rows per section): ${dims.join(", ")}.
-JSON only:`;
-  }
-
-  return `Output ONLY valid JSON. No markdown, no explanation, no extra text.
-
-UX analysis of "${category}" category.
-Ratings: Excellent|Good|Average|Poor|Weak. Keep ALL text values under 7 words.
-"rec" = one concrete design improvement a new product builder should implement.
-
-Schema:
-{"headline":"single punchy sentence max 20 words summarizing biggest opportunity","sum":"brief summary","category_score":0-100,"secs":[{"cat":"Onboarding","rows":[{"dim":"Sign-up","find":"current pattern","r":"Good","rec":"design recommendation"}]}],"opp":"market gap"}
-
-Include "category_score" with overall UX score 0-100 for the category. Topics (one section each, two rows per section): ${dims.join(", ")}.
-JSON only:`;
-}
 
 function formatReportHtml(data: any): string {
   const hasC = data.comps && data.comps.length > 0;
@@ -92,39 +55,23 @@ function formatReportHtml(data: any): string {
 
 export async function POST(req: NextRequest) {
   try {
-    const { email, category, competitors, depth, frequency } = await req.json();
+    const { email, category, competitors, depth, reportData } = await req.json();
 
-    if (!email || !category) {
-      return NextResponse.json({ error: "email and category required" }, { status: 400 });
+    if (!email || !category || !reportData) {
+      return NextResponse.json({ error: "email, category, and reportData required" }, { status: 400 });
     }
 
-    const geminiKey = process.env.GEMINI_API_KEY;
     const resendKey = process.env.RESEND_API_KEY;
 
-    if (!geminiKey) return NextResponse.json({ error: "GEMINI_API_KEY missing" }, { status: 500 });
     if (!resendKey) return NextResponse.json({ error: "RESEND_API_KEY missing" }, { status: 500 });
 
-    const ai = new GoogleGenAI({ apiKey: geminiKey });
-    const res = await ai.models.generateContent({
-      model: "gemini-2.0-flash-lite",
-      contents: [{ role: "user", parts: [{ text: buildPrompt(category, competitors || "", depth || "quick") }] }],
-    });
-
-    const raw = res.text || "";
-    const start = raw.indexOf("{");
-    const end = raw.lastIndexOf("}");
-    if (start === -1 || end === -1) {
-      return NextResponse.json({ error: "No JSON in response" }, { status: 500 });
-    }
-
-    const data = JSON.parse(raw.slice(start, end + 1));
-    const html = formatReportHtml(data);
+    const html = formatReportHtml(reportData);
 
     const resend = new Resend(resendKey);
     await resend.emails.send({
       from: "UX Rival <onboarding@resend.dev>",
       to: email,
-      subject: `Your UX Rival update — ${category}`,
+      subject: `Your UX Rival Report — ${category}`,
       html,
     });
 

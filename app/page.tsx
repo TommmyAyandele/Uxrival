@@ -8,7 +8,7 @@ const THEME_STORAGE_KEY = "uxrival_theme";
 const TOUR_STORAGE_KEY = "uxrival_toured";
 const HISTORY_STORAGE_KEY = "uxrival_history";
 
-type WatchlistItem = { id: string; category: string; competitors: string; depth: string; email: string; frequency: string; savedAt: string };
+type WatchlistItem = { id: string; category: string; competitors: string; depth: string; email: string; frequency: string; savedAt: string; reportData: any };
 type HistoryItem = { id: string; category: string; competitors: string; depth: string; reportData: any; createdAt: string };
 
 function loadWatchlist(): WatchlistItem[] {
@@ -987,6 +987,7 @@ export default function UXRival() {
       email,
       frequency: watchFrequency,
       savedAt: new Date().toISOString(),
+      reportData: reportData,
     };
     const next = [...watchlist, item];
     setWatchlist(next);
@@ -1008,7 +1009,13 @@ export default function UXRival() {
       const res = await fetch("/api/watchlist", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: item.email, category: item.category, competitors: item.competitors, depth: item.depth, frequency: item.frequency }),
+        body: JSON.stringify({ 
+          email: item.email, 
+          category: item.category, 
+          competitors: item.competitors, 
+          depth: item.depth, 
+          reportData: item.reportData 
+        }),
       });
       const data = await res.json();
       if (data.success) setToastMsg("Report sent to your email ✓");
