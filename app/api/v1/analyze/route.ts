@@ -50,7 +50,7 @@ JSON only:`;
 function getClientIP(request: NextRequest): string {
   return request.headers.get('x-forwarded-for') || 
          request.headers.get('x-real-ip') || 
-         request.ip || 
+         
          'unknown';
 }
 
@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
             "Access-Control-Allow-Headers": "Content-Type, X-API-Key",
             "X-RateLimit-Limit": RATE_LIMIT.toString(),
             "X-RateLimit-Remaining": "0",
-            "X-RateLimit-Reset": rateLimit.resetTime?.toString(),
+            "X-RateLimit-Reset": (rateLimit.resetTime ?? 0).toString(),
           }
         }
       );
@@ -223,8 +223,8 @@ export async function POST(req: NextRequest) {
         "Access-Control-Allow-Methods": "POST, OPTIONS",
         "Access-Control-Allow-Headers": "Content-Type, X-API-Key",
         "X-RateLimit-Limit": RATE_LIMIT.toString(),
-        "X-RateLimit-Remaining": rateLimit.remaining?.toString(),
-        "X-RateLimit-Reset": rateLimit.resetTime?.toString(),
+        "X-RateLimit-Remaining": (rateLimit.remaining ?? 0).toString(),
+        "X-RateLimit-Reset": (rateLimit.resetTime ?? 0).toString(),
       }
     });
 
