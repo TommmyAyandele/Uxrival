@@ -11,6 +11,13 @@ export const metadata: Metadata = {
   publisher: "UX Rival",
   metadataBase: new URL("https://uxrival.xyz"),
   alternates: { canonical: "https://uxrival.xyz" },
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico" }
+    ],
+    apple: "/favicon.svg",
+  },
   openGraph: {
     title: "UX Rival — Instant AI Competitive UX Analysis",
     description: "Instant structured teardowns, UX scoring, heatmaps and weekly monitoring for any product category. Built for designers and agencies who move fast.",
