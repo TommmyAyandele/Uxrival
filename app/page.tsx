@@ -995,6 +995,18 @@ export default function UXRival() {
     setShowWatchForm(false);
     setToastMsg("Watching this space ✓ — we'll email you updates");
     setTimeout(() => setToastMsg(""), 3000);
+    
+    // Send confirmation email (fire and forget)
+    fetch("/api/watchlist-confirm", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email,
+        category: effectiveCategory,
+        competitors,
+        frequency: watchFrequency
+      })
+    }).catch(() => {});
   };
 
   const handleRemoveWatchlist = (id: string) => {
