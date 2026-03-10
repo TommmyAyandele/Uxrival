@@ -360,7 +360,7 @@ const styles = `
   .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--surface); border: 1px solid var(--accent); color: var(--text); padding: 12px 20px; border-radius: var(--radius); font-size: 14px; z-index: 2000; box-shadow: 0 4px 24px rgba(0,0,0,0.4); }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   .fade-up { animation: fadeUp 0.4s ease; }
-  @media (max-width: 860px) { .hero-split { grid-template-columns: 1fr; gap: 36px; } .hero-right { position: static; } }
+  @media (max-width: 860px) { .hero-split { grid-template-columns: 1fr; gap: 36px; } .hero-right { position: static; } .steps { grid-template-columns: 1fr !important; } .step:not(:last-child) { border-right: none; border-bottom: 1px solid var(--border); } }
   @media (max-width: 640px) { .page { padding: 0 18px 100px; } .nav-links { display: none; } .nav-right .btn-primary { padding: 10px 18px; font-size: 13px; } .steps { grid-template-columns: 1fr; } .step:not(:last-child) { border-right: none; border-bottom: 1px solid var(--border); } .form-card { padding: 22px 18px; } .form-footer { flex-direction: column; align-items: stretch; } .radio-group { flex-direction: column; } .report-header { flex-direction: column; } .modal-actions { flex-wrap: wrap; } }
   @media print {
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
@@ -1139,12 +1139,15 @@ export default function UXRival() {
               <div className="hero-left">
                 <div className="hero-kicker">AI-powered UX intelligence</div>
                 <h1 className="hero-h1">Know where your<br /><em>competitors</em><br />are failing</h1>
-                <p className="hero-sub">Instant structured teardowns, UX scoring, heatmaps and weekly monitoring for any product category. Built for designers and agencies who move fast.</p>
+                <p className="hero-sub">Instant structured teardowns, UX scoring, heatmaps, weekly monitoring and a public API — for any product category. Built for designers and agencies who move fast.</p>
                 <div className="hero-trust">
                   <span className="trust-item">⚡ Results in ~10s</span><span className="trust-sep">·</span>
                   <span className="trust-item">30+ industries</span><span className="trust-sep">·</span>
                   <span className="trust-item">UX Scoring</span><span className="trust-sep">·</span>
+                  <span className="trust-item">Heatmap</span><span className="trust-sep">·</span>
                   <span className="trust-item">Weekly Alerts</span><span className="trust-sep">·</span>
+                  <span className="trust-item">Figma Plugin</span><span className="trust-sep">·</span>
+                  <span className="trust-item">Public API</span><span className="trust-sep">·</span>
                   <span className="trust-item">Free · No signup</span>
                 </div>
               </div>
@@ -1277,14 +1280,18 @@ export default function UXRival() {
             <p className="section-sub">Stop spending hours on manual competitor audits. UX Rival does it in seconds.</p>
             <div className="features-grid">
               {[
-                { icon: "⚡", title: "Instant teardowns", desc: "Pick an industry and get a structured UX breakdown in under 30 seconds." },
-                { icon: "⚔️", title: "Side-by-side comparison", desc: "Score up to 3 competitors across key UX dimensions in one report." },
-                { icon: "🔥", title: "UX Heatmap", desc: "See ratings as a colour grid — one glance tells the whole story. Perfect for client presentations." },
-                { icon: "✦", title: "Steal This Pattern", desc: "Every recommendation includes a real product that does it well. Stop guessing, start stealing." },
-                { icon: "📊", title: "UX Scoring", desc: "Every competitor gets a score out of 100. See who's winning and by how much." },
-                { icon: "👁", title: "Weekly Monitoring", desc: "Watch any product category and get re-run analyses delivered to your email weekly or monthly." },
-                { icon: "🎯", title: "My Product vs Market", desc: "Add your own product to the comparison and see exactly where you win and lose." },
-                { icon: "📄", title: "Export & Share", desc: "Export as PDF or share a live report link with clients instantly." },
+                { icon: "⚡", title: "Instant Teardowns", desc: "Structured UX breakdown of any product category in under 30 seconds." },
+                { icon: "⚔️", title: "Competitor Scoring", desc: "Score up to 3 competitors out of 100 across key UX dimensions." },
+                { icon: "🔥", title: "UX Heatmap", desc: "See all ratings as a colour grid. One glance tells the whole story." },
+                { icon: "✦", title: "Steal This Pattern", desc: "Every recommendation includes a real product doing it well." },
+                { icon: "🎯", title: "My Product vs Market", desc: "Add your own product and see exactly where you win and lose." },
+                { icon: "👁", title: "Weekly Monitoring", desc: "Get re-run analyses delivered to your inbox weekly or monthly." },
+                { icon: "📄", title: "Export & Share", desc: "Export as Excel or share a live report link with clients instantly." },
+                { icon: "💬", title: "Welcome Email", desc: "Every user gets a beautiful branded email when they sign up." },
+                { icon: "🕓", title: "Analysis History", desc: "Your last 10 analyses saved in your browser. Always pick up where you left off." },
+                { icon: "�", title: "Public API", desc: "Integrate UX analysis into your own tools. Free. No API key required." },
+                { icon: "🎨", title: "Figma Plugin", desc: "Run analyses and create report frames directly inside Figma." },
+                { icon: "🌗", title: "Dark & Light Mode", desc: "Switch between dark and light themes for comfortable use anytime." },
               ].map((f) => <div key={f.title} className="feature-card"><div className="feature-icon">{f.icon}</div><div className="feature-title">{f.title}</div><div className="feature-desc">{f.desc}</div></div>)}
             </div>
           </section>
@@ -1294,9 +1301,9 @@ export default function UXRival() {
             <div className="steps-wrap" style={{ marginTop: 40 }}>
               <div className="steps">
                 {[
-                  { n: "01", title: "Pick your industry", desc: "Select from 30+ categories or type your own. Add up to 3 competitors or your own product." },
-                  { n: "02", title: "Customise your analysis", desc: "Choose depth, set focus areas, and switch between competitor mode or my product mode." },
-                  { n: "03", title: "Get your report", desc: "See scores, heatmap, steal-worthy patterns and Your Move recommendations. Export or share instantly." },
+                  { n: "01", title: "Pick your industry", desc: "Choose from 30+ categories or type your own niche. Add up to 3 competitors or your own product." },
+                  { n: "02", title: "Customise your analysis", desc: "Choose Quick Scan or Deep Teardown. Set focus areas. Switch between competitor mode or My Product mode." },
+                  { n: "03", title: "Get your report", desc: "See scores, heatmap, steal-worthy patterns and Your Move recommendations. Export as Excel, share a link, or push to Figma." },
                 ].map((s) => <div key={s.n} className="step"><div className="step-num">STEP {s.n}</div><div className="step-title">{s.title}</div><div className="step-desc">{s.desc}</div></div>)}
               </div>
             </div>
@@ -1306,12 +1313,32 @@ export default function UXRival() {
             <div className="section-title">Built for people who ship products</div>
             <div className="audience-grid">
               {[
-                { accent: "Product Designers", desc: "Validate decisions with competitive data before you diverge from patterns." },
-                { accent: "UX Agencies", desc: "Produce client-ready audits in minutes, not days." },
-                { accent: "Founders", desc: "Find UX gaps your competitors haven't filled yet." },
-                { accent: "Product Managers", desc: "Brief your design team with structured competitive context." },
-                { accent: "Startups", desc: "Benchmark your product against established players before you ship. Know where you stand from day one." },
+                { accent: "Product Designers", desc: "Stop spending hours on manual audits. Get structured insights in seconds." },
+                { accent: "UX Agencies", desc: "Run competitor analyses for clients and export branded reports instantly." },
+                { accent: "Founders", desc: "Understand the UX landscape before you build. Know where the gaps are." },
+                { accent: "Developers", desc: "Use our public API to integrate UX analysis into your own tools and workflows." },
+                { accent: "Startups", desc: "Benchmark your product against established players from day one." },
               ].map((a) => <div key={a.accent} className="audience-card"><div className="audience-role"><span>{a.accent}</span></div><div className="audience-desc">{a.desc}</div></div>)}
+            </div>
+          </section>
+          <section className="section">
+            <div className="section-eyebrow">Built for Developers Too</div>
+            <div className="section-title">Integrate UX Analysis Anywhere</div>
+            <p className="section-sub">Integrate AI-powered UX analysis into your own tools with our free public API.</p>
+            <div className="code-block" style={{ marginTop: 32, marginBottom: 32, maxWidth: "100%", overflow: "auto" }}>
+              <pre style={{ margin: 0, whiteSpace: "pre", overflowX: "auto" }}>{`const res = await fetch("https://uxrival.xyz/api/v1/analyze", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    category: "fintech",
+    competitors: ["Paystack", "Flutterwave"],
+    depth: "quick"
+  })
+});
+const data = await res.json();`}</pre>
+            </div>
+            <div style={{ textAlign: "center", marginTop: 24 }}>
+              <a href="/developers" className="btn-secondary">View API Docs →</a>
             </div>
           </section>
         </div>
