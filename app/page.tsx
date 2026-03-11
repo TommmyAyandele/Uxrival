@@ -204,18 +204,17 @@ const styles = `
     color: var(--text);
     font-size: 11px;
     font-family: var(--font-m);
-    padding: 6px 10px;
+    padding: 5px 10px;
     border-radius: 6px;
     border: 1px solid var(--border);
     white-space: nowrap;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.15s, visibility 0.15s;
-    z-index: 1000;
     pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s;
+    z-index: 1000;
   }
   
-  .nav-tooltip::after {
+  .nav-tooltip::before {
     content: '';
     position: absolute;
     top: -4px;
@@ -228,9 +227,8 @@ const styles = `
     border-bottom: 4px solid var(--surface3);
   }
   
-  .nav-icon-btn:hover .nav-tooltip {
+  div:hover > .nav-tooltip {
     opacity: 1;
-    visibility: visible;
   }
   
   /* Mobile hamburger menu */
@@ -1216,23 +1214,22 @@ export default function UXRival() {
             
             {/* History and Watchlist icon buttons */}
             <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
-              <div style={{ position: "relative" }}>
+              <div style={{ position: "relative", display: "inline-flex" }}>
                 <button 
                   type="button" 
-                  className="nav-icon-btn" 
                   onClick={() => setShowHistoryModal(true)}
                   style={{ 
-                    background: "var(--surface2)", 
-                    border: "1px solid var(--border)", 
-                    borderRadius: "8px",
-                    color: "var(--text-muted)", 
-                    cursor: "pointer", 
-                    padding: "8px", 
-                    width: "36px",
-                    height: "36px",
+                    width: 36,
+                    height: 36,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
+                    background: "var(--surface2)",
+                    border: "1px solid var(--border)",
+                    borderRadius: 8,
+                    color: "var(--text-muted)",
+                    cursor: "pointer",
+                    position: "relative",
                     transition: "all 0.15s"
                   }}
                   onMouseEnter={(e) => {
@@ -1246,15 +1243,14 @@ export default function UXRival() {
                     e.currentTarget.style.background = "var(--surface2)";
                   }}
                 >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="12" cy="12" r="10"/>
-                    <path d="M12 6v6l4-4"/>
-                    <path d="M12 18v-6l-4 4"/>
+                    <polyline points="12 6 12 16 14 16"/>
+                    <polyline points="12 18 14 18"/>
                   </svg>
                 </button>
-                <div className="nav-tooltip">Analysis History</div>
                 {history.length > 0 && (
-                  <span className="nav-badge" style={{ 
+                  <span style={{ 
                     position: "absolute", 
                     top: "-6px", 
                     right: "-6px",
@@ -1271,25 +1267,25 @@ export default function UXRival() {
                     {history.length}
                   </span>
                 )}
+                <span className="nav-tooltip">Analysis History</span>
               </div>
               
-              <div style={{ position: "relative" }}>
+              <div style={{ position: "relative", display: "inline-flex" }}>
                 <button 
                   type="button" 
-                  className="nav-icon-btn" 
                   onClick={() => setShowWatchlistModal(true)}
                   style={{ 
-                    background: "var(--surface2)", 
-                    border: "1px solid var(--border)", 
-                    borderRadius: "8px",
-                    color: "var(--text-muted)", 
-                    cursor: "pointer", 
-                    padding: "8px", 
-                    width: "36px",
-                    height: "36px",
+                    width: 36,
+                    height: 36,
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
+                    background: "var(--surface2)",
+                    border: "1px solid var(--border)",
+                    borderRadius: 8,
+                    color: "var(--text-muted)",
+                    cursor: "pointer",
+                    position: "relative",
                     transition: "all 0.15s"
                   }}
                   onMouseEnter={(e) => {
@@ -1303,16 +1299,15 @@ export default function UXRival() {
                     e.currentTarget.style.background = "var(--surface2)";
                   }}
                 >
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <path d="M1 12s4-7 4-7 4-7 7v10"/>
-                    <path d="M21 12s-4 7-4 7-4 7v10"/>
-                    <path d="M12 17c2.76 0 5-2.24 5-5s-2.24-5-5-5"/>
-                    <path d="M12 17c-2.76 0-5 2.24-5 5s2.24 5 5 5"/>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8-11 8-11 8z"/>
+                    <path d="M21 12s-4 11-8 11 8-11 8-11 8z"/>
+                    <path d="M12 17c2.76 0 5-2.24 5-5s-2.24-5 5 5"/>
+                    <path d="M12 17c-2.76 0-5 2.24-5 5s-2.24-5 5 5"/>
                   </svg>
                 </button>
-                <div className="nav-tooltip">My Watchlist</div>
                 {watchlist.length > 0 && (
-                  <span className="nav-badge" style={{ 
+                  <span style={{ 
                     position: "absolute", 
                     top: "-6px", 
                     right: "-6px",
@@ -1329,6 +1324,7 @@ export default function UXRival() {
                     {watchlist.length}
                   </span>
                 )}
+                <span className="nav-tooltip">My Watchlist</span>
               </div>
             </div>
             
