@@ -24,7 +24,7 @@ function formatReportHtml(data: any): string {
         <h2 style="color:#ffffff;font-size:18px;font-weight:700;margin:0;line-height:1.4;">${data.headline}</h2>
       </div>
     </div>
-  ` : '';
+    ` : '';
   
   // Summary
   const summary = data.sum ? `
@@ -33,7 +33,7 @@ function formatReportHtml(data: any): string {
         <strong style="color:#efefef;">Overview —</strong> ${data.sum}
       </p>
     </div>
-  ` : '';
+    ` : '';
   
   // Score cards
   const scoreCards = hasC ? `
@@ -50,16 +50,16 @@ function formatReportHtml(data: any): string {
         `;
       }).join('')}
     </div>
-  ` : '';
+    ` : '';
   
   // Table
   let tableRows = '';
   if (data.secs) {
     for (const sec of data.secs) {
       tableRows += `
-        <tr style="background:#f5f5f5;color:#888888;font-size:11px;text-transform:uppercase;letter-spacing:0.1em;">
-          <td style="padding:10px 12px;font-weight:600;">${sec.cat}</td>
-          <td colspan="${data.comps.length}" style="padding:10px 12px;text-align:center;font-weight:600;">${data.comps.map(() => '').join(' / ')}</td>
+        <tr style="background:#1a1a28;color:#888888;font-size:11px;text-transform:uppercase;letter-spacing:0.1em;padding:10px 12px;">
+          <td style="font-weight:600;">${sec.cat}</td>
+          ${hasC ? data.comps.map(() => `<td style="padding:10px 12px;text-align:center;font-weight:600;">Competitor</td>`).join('') : ''}
           <td style="padding:10px 12px;">Key Insight</td>
           <td style="padding:10px 12px;">Your Move</td>
         </tr>
@@ -77,24 +77,24 @@ function formatReportHtml(data: any): string {
                   rating === "Average" ? "#facc15" :
                   rating === "Poor" ? "#f97316" :
                   rating === "Weak" ? "#f87171" : "#666666";
-                return `<td style="padding:10px 12px;font-size:13px;border-bottom:1px solid #f0f0f0;"><span style="color:${ratingColor};font-weight:600;">${rating}</span></td>`;
+                return `<td style="padding:12px;font-size:13px;color:#ffffff;border-bottom:1px solid #1a1a28;"><span style="color:${ratingColor};font-weight:600;">${rating}</span></td>`;
               }
             )
             .join("");
           tableRows += `
-            <tr style="border-bottom:1px solid #f0f0f0;">
-              <td style="padding:10px 12px;font-size:11px;color:#888888;font-weight:600;">${row.dim}</td>
+            <tr style="border-bottom:1px solid #1a1a28;">
+              <td style="padding:12px;font-size:11px;color:#888888;font-weight:600;">${row.dim}</td>
               ${cells}
-              <td style="padding:10px 12px;font-size:12px;color:#b0b0bc;">${row.ins || ""}</td>
-              <td style="padding:10px 12px;font-size:12px;color:#5a4fd6;">${row.rec || ""}</td>
+              <td style="padding:12px;font-size:12px;color:#b0b0bc;">${row.ins || ""}</td>
+              <td style="padding:12px;font-size:12px;color:#e8ff47;">${row.rec || ""}</td>
             </tr>
           `;
         } else {
           tableRows += `
-            <tr style="border-bottom:1px solid #f0f0f0;">
-              <td style="padding:10px 12px;font-size:11px;color:#888888;">${row.find || ""}</td>
-              <td style="padding:10px 12px;font-size:13px;">${row.r || ""}</td>
-              <td style="padding:10px 12px;font-size:12px;color:#5a4fd6;">${row.rec || ""}</td>
+            <tr style="border-bottom:1px solid #1a1a28;">
+              <td style="padding:12px;font-size:11px;color:#888888;">${row.find || ""}</td>
+              <td style="padding:12px;font-size:13px;">${row.r || ""}</td>
+              <td style="padding:12px;font-size:12px;color:#e8ff47;">${row.rec || ""}</td>
             </tr>
           `;
         }
@@ -104,8 +104,8 @@ function formatReportHtml(data: any): string {
   
   const table = `
     <div style="margin:0 32px;overflow-x:auto;">
-      <table style="width:100%;border-collapse:collapse;border:1px solid #e0e0e0;border-radius:8px;background:#ffffff;">
-        <thead style="background:#f5f5f5;">
+      <table style="width:100%;border-collapse:collapse;border:1px solid #1a1a28;border-radius:8px;background:#ffffff;">
+        <thead style="background:#1a1a28;">
           <tr>
             <th style="padding:12px;font-size:11px;color:#888888;text-align:left;">Dimension</th>
             ${hasC ? data.comps.map(() => `<th style="padding:12px;font-size:11px;color:#888888;text-align:center;">Competitor</th>`).join('') : ''}
@@ -120,25 +120,25 @@ function formatReportHtml(data: any): string {
     </div>
   `;
   
-  // Gap opportunity
+  // GAP opportunity band
   const gap = data.opp ? `
-    <div style="background:#fffbeb;border-left:3px solid #e8ff47;margin:0 32px;padding:14px 16px;">
+    <div style="background:#1a1500;border-left:3px solid #e8ff47;padding:14px 16px;margin-top:16px;">
       <div style="font-size:10px;color:#8a7a00;font-weight:700;text-transform:uppercase;letter-spacing:0.1em;margin-bottom:4px;">OPPORTUNITY</div>
-      <div style="font-size:13px;color:#555555;">${data.opp}</div>
+      <div style="font-size:13px;color:#ccaa00;">${data.opp}</div>
     </div>
   ` : '';
   
   // CTA
   const cta = `
-    <div style="text-align:center;margin:28px auto;">
-      <a href="https://uxrival.xyz" style="display:inline-block;background:#e8ff47;color:#0a0a0a;font-weight:700;font-size:14px;padding:14px 32px;border-radius:8px;text-decoration:none;width:fit-content;">View Full Report on UXRival.xyz →</a>
+    <div style="text-align:center;margin:24px auto;">
+      <a href="https://uxrival.xyz" style="display:inline-block;background:#e8ff47;color:#0a0a0a;font-weight:700;padding:14px 32px;border-radius:8px;text-decoration:none;width:fit-content;">Run another analysis →</a>
     </div>
   `;
   
   // Footer
   const footer = `
     <div style="background:#f9f9f9;padding:20px 32px;border-top:1px solid #eeeeee;">
-      <div style="font-size:12px;color:#aaaaaa;">Sent by UX Rival · uxrival.xyz · You're receiving this because you saved a watchlist on UX Rival</div>
+      <div style="font-size:12px;color:#aaaaaa;">Sent by UX Rival · uxrival.xyz · You're receiving this because you set up a watchlist on UX Rival</div>
     </div>
   `;
 
