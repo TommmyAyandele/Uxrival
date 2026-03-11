@@ -181,6 +181,23 @@ const styles = `
   .nav-links { display: flex; align-items: center; gap: 28px; }
   .nav-link { font-size: 13px; color: var(--text-muted); cursor: pointer; transition: color 0.15s; }
   .nav-link:hover { color: var(--text); }
+  
+  /* Mobile hamburger menu */
+  .mobile-hamburger { display: none; flex-direction: column; gap: 4px; background: none; border: none; cursor: pointer; padding: 8px; }
+  .hamburger-line { width: 20px; height: 2px; background-color: #e8ff47; transition: all 0.2s ease; }
+  
+  .mobile-menu-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 1000; display: flex; justify-content: flex-end; }
+  .mobile-menu-panel { width: 280px; height: 100%; background: #0a0a0a; border-left: 1px solid var(--border); transform: translateX(100%); transition: transform 0.25s ease; position: relative; }
+  .mobile-menu-overlay .mobile-menu-panel { transform: translateX(0); }
+  
+  .mobile-menu-close { position: absolute; top: 20px; right: 20px; background: none; border: none; color: var(--text); font-size: 24px; cursor: pointer; padding: 8px; }
+  
+  .mobile-menu-items { padding: 60px 20px 20px; height: 100%; display: flex; flex-direction: column; }
+  .mobile-menu-item { height: 48px; display: flex; align-items: center; font-size: 16px; color: var(--text); border-bottom: 1px solid var(--border); cursor: pointer; transition: color 0.15s; }
+  .mobile-menu-item:hover { color: var(--accent); }
+  
+  .mobile-theme-toggle { display: flex; padding: 20px 0; gap: 8px; }
+  .mobile-menu-cta { margin-top: auto; padding-top: 20px; }
   .theme-toggle { display: inline-flex; padding: 3px; background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; gap: 0; }
   .theme-toggle-option { font-family: var(--font-m); font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 16px; background: transparent; border: none; cursor: pointer; transition: all 0.15s; }
   .theme-toggle-option:hover { color: var(--text); }
@@ -361,7 +378,7 @@ const styles = `
   @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   .fade-up { animation: fadeUp 0.4s ease; }
   @media (max-width: 860px) { .hero-split { grid-template-columns: 1fr; gap: 36px; } .hero-right { position: static; } .steps { grid-template-columns: 1fr !important; } .step:not(:last-child) { border-right: none; border-bottom: 1px solid var(--border); } }
-  @media (max-width: 640px) { .page { padding: 0 18px 100px; } .nav-links { display: none; } .nav-right .btn-primary { padding: 10px 18px; font-size: 13px; } .steps { grid-template-columns: 1fr; } .step:not(:last-child) { border-right: none; border-bottom: 1px solid var(--border); } .form-card { padding: 22px 18px; } .form-footer { flex-direction: column; align-items: stretch; } .radio-group { flex-direction: column; } .report-header { flex-direction: column; } .modal-actions { flex-wrap: wrap; } }
+  @media (max-width: 640px) { .page { padding: 0 18px 100px; } .nav-links { display: none; } .theme-toggle { display: none; } .nav-right .btn-primary { display: none; } .mobile-hamburger { display: flex; } .steps { grid-template-columns: 1fr; } .step:not(:last-child) { border-right: none; border-bottom: 1px solid var(--border); } .form-card { padding: 22px 18px; } .form-footer { flex-direction: column; align-items: stretch; } .radio-group { flex-direction: column; } .report-header { flex-direction: column; } .modal-actions { flex-wrap: wrap; } }
   @media print {
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
     body > * { display: none !important; }
@@ -837,6 +854,7 @@ export default function UXRival() {
   const [watchlist, setWatchlist] = useState<WatchlistItem[]>([]);
   const [toastMsg, setToastMsg] = useState("");
   const [sendNowId, setSendNowId] = useState<string | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const effectiveCategory = industry === "custom" ? customCategory : industry;
   const canSubmit = !loading && (industry === "custom" ? customCategory.trim().length > 0 : industry.length > 0) && (analysisMode !== "myProduct" || myProduct.trim().length > 0);
 
@@ -1129,21 +1147,68 @@ export default function UXRival() {
             <div className="nav-logo">UX<span>Rival</span></div>
             <span className="nav-pill">BETA</span>
           </div>
-            <div className="nav-right">
+          <div className="nav-right">
             <div className="nav-links">
               <span className="nav-link" onClick={scrollToLearn}>Features</span>
               <span className="nav-link" onClick={scrollToLearn}>How it works</span>
               <span className="nav-link" onClick={scrollToLearn}>Who it&apos;s for</span>
               <span className="nav-link" onClick={() => setShowHistoryModal(true)} style={{ display: "flex", alignItems: "center" }}>History{history.length > 0 && <span className="nav-badge" style={{ background: "var(--surface2)", color: "var(--text-muted)" }}>{history.length}</span>}</span>
               <span className="nav-link" onClick={() => setShowWatchlistModal(true)} style={{ display: "flex", alignItems: "center" }}>Watchlist{watchlist.length > 0 && <span className="nav-badge">{watchlist.length}</span>}</span>
+              <span className="nav-link" onClick={() => window.location.href = "/developers"}>API</span>
             </div>
             <div className="theme-toggle">
               <button type="button" className={`theme-toggle-option${theme === "dark" ? " active" : ""}`} onClick={() => setTheme("dark")}>Dark</button>
               <button type="button" className={`theme-toggle-option${theme === "light" ? " active" : ""}`} onClick={() => setTheme("light")}>Light</button>
             </div>
             <button type="button" className="btn-primary" onClick={scrollToForm}>Get Started Free →</button>
+            
+            {/* Mobile hamburger button */}
+            <button 
+              type="button" 
+              className="mobile-hamburger" 
+              onClick={() => setMobileMenuOpen(true)}
+              aria-label="Open menu"
+            >
+              <div className="hamburger-line"></div>
+              <div className="hamburger-line"></div>
+              <div className="hamburger-line"></div>
+            </button>
           </div>
         </nav>
+
+        {/* Mobile menu drawer */}
+        {mobileMenuOpen && (
+          <div className="mobile-menu-overlay" onClick={() => setMobileMenuOpen(false)}>
+            <div className="mobile-menu-panel" onClick={(e) => e.stopPropagation()}>
+              <button 
+                type="button" 
+                className="mobile-menu-close" 
+                onClick={() => setMobileMenuOpen(false)}
+                aria-label="Close menu"
+              >
+                ×
+              </button>
+              
+              <div className="mobile-menu-items">
+                <div className="mobile-menu-item" onClick={() => { setMobileMenuOpen(false); scrollToLearn(); }}>Features</div>
+                <div className="mobile-menu-item" onClick={() => { setMobileMenuOpen(false); scrollToLearn(); }}>How it works</div>
+                <div className="mobile-menu-item" onClick={() => { setMobileMenuOpen(false); scrollToLearn(); }}>Who it&apos;s for</div>
+                <div className="mobile-menu-item" onClick={() => { setMobileMenuOpen(false); setShowWatchlistModal(true); }}>Watchlist{watchlist.length > 0 && <span className="nav-badge">{watchlist.length}</span>}</div>
+                <div className="mobile-menu-item" onClick={() => { setMobileMenuOpen(false); setShowHistoryModal(true); }}>History{history.length > 0 && <span className="nav-badge" style={{ background: "var(--surface2)", color: "var(--text-muted)" }}>{history.length}</span>}</div>
+                <div className="mobile-menu-item" onClick={() => { setMobileMenuOpen(false); window.location.href = "/developers"; }}>API</div>
+                
+                <div className="mobile-theme-toggle">
+                  <button type="button" className={`theme-toggle-option${theme === "dark" ? " active" : ""}`} onClick={() => setTheme("dark")}>Dark</button>
+                  <button type="button" className={`theme-toggle-option${theme === "light" ? " active" : ""}`} onClick={() => setTheme("light")}>Light</button>
+                </div>
+                
+                <div className="mobile-menu-cta">
+                  <button type="button" className="btn-primary" onClick={() => { setMobileMenuOpen(false); scrollToForm(); }}>Get Started Free →</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
 
         <main>
           <section className="hero-section">
