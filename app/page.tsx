@@ -184,10 +184,10 @@ const styles = `
   
   /* Mobile hamburger menu */
   .mobile-hamburger { display: none; flex-direction: column; gap: 4px; background: none; border: none; cursor: pointer; padding: 8px; }
-  .hamburger-line { width: 20px; height: 2px; background-color: #e8ff47; transition: all 0.2s ease; }
+  .hamburger-line { width: 20px; height: 2px; background-color: var(--text); transition: all 0.2s ease; }
   
-  .mobile-menu-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.7); z-index: 1000; display: flex; justify-content: flex-end; }
-  .mobile-menu-panel { width: 280px; height: 100%; background: #0a0a0a; border-left: 1px solid var(--border); transform: translateX(100%); transition: transform 0.25s ease; position: relative; }
+  .mobile-menu-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 1000; display: flex; justify-content: flex-end; }
+  .mobile-menu-panel { width: 280px; height: 100%; background: var(--bg); border-left: 1px solid var(--border); transform: translateX(100%); transition: transform 0.25s ease; position: relative; right: 0; }
   .mobile-menu-overlay .mobile-menu-panel { transform: translateX(0); }
   
   .mobile-menu-close { position: absolute; top: 20px; right: 20px; background: none; border: none; color: var(--text); font-size: 24px; cursor: pointer; padding: 8px; }
