@@ -1341,11 +1341,7 @@ export default function UXRival() {
                     e.currentTarget.style.background = "var(--surface2)";
                   }}
                 >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10"/>
-                    <polyline points="12 6 12 16 14 16"/>
-                    <polyline points="12 18 14 18"/>
-                  </svg>
+                  <span style={{ fontSize: "16px" }}>⏱</span>
                 </button>
                 {history.length > 0 && (
                   <span style={{ 
@@ -1397,12 +1393,7 @@ export default function UXRival() {
                     e.currentTarget.style.background = "var(--surface2)";
                   }}
                 >
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M1 12s4-8 11-8 11 8-11 8-11 8z"/>
-                    <path d="M21 12s-4 11-8 11 8-11 8-11 8z"/>
-                    <path d="M12 17c2.76 0 5-2.24 5-5s-2.24-5 5 5"/>
-                    <path d="M12 17c-2.76 0-5 2.24-5 5s-2.24-5 5 5"/>
-                  </svg>
+                  <span style={{ fontSize: "16px" }}>🔔</span>
                 </button>
                 {watchlist.length > 0 && (
                   <span style={{ 
