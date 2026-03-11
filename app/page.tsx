@@ -194,6 +194,45 @@ const styles = `
   
   .nav-icon-btn:hover { background: var(--surface2) !important; }
   
+  /* Tooltip styles */
+  .nav-tooltip {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface3);
+    color: var(--text);
+    font-size: 11px;
+    font-family: var(--font-m);
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.15s, visibility 0.15s;
+    z-index: 1000;
+    pointer-events: none;
+  }
+  
+  .nav-tooltip::after {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-bottom: 4px solid var(--surface3);
+  }
+  
+  .nav-icon-btn:hover .nav-tooltip {
+    opacity: 1;
+    visibility: visible;
+  }
+  
   /* Mobile hamburger menu */
   .mobile-hamburger { display: none; flex-direction: column; gap: 4px; background: none; border: none; cursor: pointer; padding: 8px; }
   .hamburger-line { width: 20px; height: 2px; background-color: var(--text); transition: all 0.2s ease; }
@@ -1182,30 +1221,47 @@ export default function UXRival() {
                   type="button" 
                   className="nav-icon-btn" 
                   onClick={() => setShowHistoryModal(true)}
-                  title="History"
                   style={{ 
-                    background: "none", 
-                    border: "none", 
+                    background: "var(--surface2)", 
+                    border: "1px solid var(--border)", 
+                    borderRadius: "8px",
                     color: "var(--text-muted)", 
-                    fontSize: "18px", 
                     cursor: "pointer", 
                     padding: "8px", 
-                    borderRadius: "6px",
+                    width: "36px",
+                    height: "36px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                     transition: "all 0.15s"
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.color = "var(--text)"}
-                  onMouseLeave={(e) => e.currentTarget.style.color = "var(--text-muted)"}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = "var(--accent)";
+                    e.currentTarget.style.color = "var(--accent)";
+                    e.currentTarget.style.background = "var(--accent-dim)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = "var(--border)";
+                    e.currentTarget.style.color = "var(--text-muted)";
+                    e.currentTarget.style.background = "var(--surface2)";
+                  }}
                 >
-                  🕓
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M12 6v6l4-4"/>
+                    <path d="M12 18v-6l-4 4"/>
+                  </svg>
                 </button>
+                <div className="nav-tooltip">Analysis History</div>
                 {history.length > 0 && (
                   <span className="nav-badge" style={{ 
                     position: "absolute", 
-                    top: "4px", 
-                    right: "4px",
+                    top: "-6px", 
+                    right: "-6px",
                     background: "var(--accent)",
-                    color: "#090909",
+                    color: "#0a0a0a",
                     fontSize: "9px",
+                    fontWeight: "bold",
                     minWidth: "16px",
                     height: "16px",
                     display: "flex",
@@ -1222,30 +1278,48 @@ export default function UXRival() {
                   type="button" 
                   className="nav-icon-btn" 
                   onClick={() => setShowWatchlistModal(true)}
-                  title="Watchlist"
                   style={{ 
-                    background: "none", 
-                    border: "none", 
+                    background: "var(--surface2)", 
+                    border: "1px solid var(--border)", 
+                    borderRadius: "8px",
                     color: "var(--text-muted)", 
-                    fontSize: "18px", 
                     cursor: "pointer", 
                     padding: "8px", 
-                    borderRadius: "6px",
+                    width: "36px",
+                    height: "36px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
                     transition: "all 0.15s"
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.color = "var(--text)"}
-                  onMouseLeave={(e) => e.currentTarget.style.color = "var(--text-muted)"}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = "var(--accent)";
+                    e.currentTarget.style.color = "var(--accent)";
+                    e.currentTarget.style.background = "var(--accent-dim)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = "var(--border)";
+                    e.currentTarget.style.color = "var(--text-muted)";
+                    e.currentTarget.style.background = "var(--surface2)";
+                  }}
                 >
-                  👁
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M1 12s4-7 4-7 4-7 7v10"/>
+                    <path d="M21 12s-4 7-4 7-4 7v10"/>
+                    <path d="M12 17c2.76 0 5-2.24 5-5s-2.24-5-5-5"/>
+                    <path d="M12 17c-2.76 0-5 2.24-5 5s2.24 5 5 5"/>
+                  </svg>
                 </button>
+                <div className="nav-tooltip">My Watchlist</div>
                 {watchlist.length > 0 && (
                   <span className="nav-badge" style={{ 
                     position: "absolute", 
-                    top: "4px", 
-                    right: "4px",
+                    top: "-6px", 
+                    right: "-6px",
                     background: "var(--accent)",
-                    color: "#090909",
+                    color: "#0a0a0a",
                     fontSize: "9px",
+                    fontWeight: "bold",
                     minWidth: "16px",
                     height: "16px",
                     display: "flex",
