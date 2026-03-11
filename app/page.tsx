@@ -1628,10 +1628,10 @@ export default function UXRival() {
                 { icon: "🔥", title: "UX Heatmap", desc: "See all ratings as a colour grid. One glance tells the whole story." },
                 { icon: "✦", title: "Steal This Pattern", desc: "Every recommendation includes a real product doing it well." },
                 { icon: "🎯", title: "My Product vs Market", desc: "Add your own product and see exactly where you win and lose." },
-                { icon: "👁", title: "Weekly Monitoring", desc: "Get re-run analyses delivered to your inbox weekly or monthly." },
+                { icon: "�", title: "Weekly Monitoring", desc: "Get re-run analyses delivered to your inbox weekly or monthly." },
                 { icon: "📄", title: "Export & Share", desc: "Export as Excel or share a live report link with clients instantly." },
                 { icon: "💬", title: "Welcome Email", desc: "Every user gets a beautiful branded email when they sign up." },
-                { icon: "🕓", title: "Analysis History", desc: "Your last 10 analyses saved in your browser. Always pick up where you left off." },
+                { icon: "⏱", title: "Analysis History", desc: "Your last 10 analyses saved in your browser. Always pick up where you left off." },
                 { icon: "�", title: "Public API", desc: "Integrate UX analysis into your own tools. Free. No API key required." },
                 { icon: "🎨", title: "Figma Plugin", desc: "Run analyses and create report frames directly inside Figma." },
                 { icon: "🌗", title: "Dark & Light Mode", desc: "Switch between dark and light themes for comfortable use anytime." },
@@ -1739,7 +1739,7 @@ const data = await res.json();`}</pre>
             <div className="modal-scroll">
               {watchlist.length === 0 ? (
                 <div style={{ padding: "60px 40px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
-                  <div style={{ fontSize: "48px", color: "var(--text-dim)" }}>👁</div>
+                  <div style={{ fontSize: "48px", color: "var(--text-dim)" }}>�</div>
                   <div style={{ fontSize: "18px", fontFamily: "var(--font-d)", fontWeight: "700", marginBottom: "8px" }}>No spaces watched yet</div>
                   <div style={{ fontSize: "13px", color: "var(--text-muted)", maxWidth: "320px", lineHeight: "1.5", margin: "0 auto" }}>Run an analysis and click Get Weekly Updates to monitor a product category. We'll email you when things change.</div>
                   <button type="button" className="btn-primary" onClick={() => { setShowWatchlistModal(false); scrollToForm(); }}>Run your first analysis →</button>
