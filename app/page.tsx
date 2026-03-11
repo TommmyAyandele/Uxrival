@@ -197,7 +197,8 @@ const styles = `
   /* Tooltip styles */
   .nav-tooltip {
     position: absolute;
-    bottom: calc(100% + 8px);
+    top: calc(100% + 8px);
+    bottom: auto;
     left: 50%;
     transform: translateX(-50%);
     background: var(--surface3);
@@ -217,7 +218,8 @@ const styles = `
   .nav-tooltip::before {
     content: '';
     position: absolute;
-    top: -4px;
+    bottom: 100%;
+    top: auto;
     left: 50%;
     transform: translateX(-50%);
     width: 0;
