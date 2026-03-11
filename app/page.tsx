@@ -100,7 +100,17 @@ function buildPrompt(category: string, competitorList: string, depth: string, fo
 
   if (hasComp) {
     const eg = comps.map((c) => `"${c}":{"r":"Good","n":"5 words"}`).join(",");
-    const myProductNote = myProduct?.trim() ? "\nThe first competitor listed is the user's own product — be objective but highlight where it has advantages.\n" : "";
+    const myProductNote = myProduct?.trim() ? `
+The first competitor listed is the user's own product.
+
+Be brutally honest and objective. Do not favour any product including the user's own product. If the user's product has weaknesses, score it lower than competitors who do it better. Real designers need accurate data not flattery.
+
+The user's product may be newer or less established than competitors — reflect this honestly in the scores. It is completely acceptable and expected to score the user's product lower than competitors in areas where established products genuinely perform better.
+
+Scores should reflect real market position. A new fintech app should not score 85 against Paystack which has years of UX refinement unless there is a genuinely compelling reason.
+
+If you cannot find reliable information about a product, score it as Average — do not assume it is good.
+` : "";
     return `Output ONLY valid JSON. No markdown, no explanation, no extra text.
 
 UX analysis of "${category}". Compare: ${comps.join(", ")}.
