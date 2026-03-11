@@ -192,6 +192,8 @@ const styles = `
   .nav-link { font-size: 13px; color: var(--text-muted); cursor: pointer; transition: color 0.15s; }
   .nav-link:hover { color: var(--text); }
   
+  .nav-icon-btn:hover { background: var(--surface2) !important; }
+  
   /* Mobile hamburger menu */
   .mobile-hamburger { display: none; flex-direction: column; gap: 4px; background: none; border: none; cursor: pointer; padding: 8px; }
   .hamburger-line { width: 20px; height: 2px; background-color: var(--text); transition: all 0.2s ease; }
@@ -1166,16 +1168,96 @@ export default function UXRival() {
           <div className="nav-right">
             <div className="nav-links">
               <span className="nav-link" onClick={scrollToLearn}>Features</span>
-              <span className="nav-link" onClick={scrollToLearn}>How it works</span>
-              <span className="nav-link" onClick={scrollToLearn}>Who it&apos;s for</span>
-              <span className="nav-link" onClick={() => setShowHistoryModal(true)} style={{ display: "flex", alignItems: "center" }}>History{history.length > 0 && <span className="nav-badge" style={{ background: "var(--surface2)", color: "var(--text-muted)" }}>{history.length}</span>}</span>
-              <span className="nav-link" onClick={() => setShowWatchlistModal(true)} style={{ display: "flex", alignItems: "center" }}>Watchlist{watchlist.length > 0 && <span className="nav-badge">{watchlist.length}</span>}</span>
               <span className="nav-link" onClick={() => window.location.href = "/developers"}>API</span>
             </div>
             <div className="theme-toggle">
               <button type="button" className={`theme-toggle-option${theme === "dark" ? " active" : ""}`} onClick={() => setTheme("dark")}>Dark</button>
               <button type="button" className={`theme-toggle-option${theme === "light" ? " active" : ""}`} onClick={() => setTheme("light")}>Light</button>
             </div>
+            
+            {/* History and Watchlist icon buttons */}
+            <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+              <div style={{ position: "relative" }}>
+                <button 
+                  type="button" 
+                  className="nav-icon-btn" 
+                  onClick={() => setShowHistoryModal(true)}
+                  title="History"
+                  style={{ 
+                    background: "none", 
+                    border: "none", 
+                    color: "var(--text-muted)", 
+                    fontSize: "18px", 
+                    cursor: "pointer", 
+                    padding: "8px", 
+                    borderRadius: "6px",
+                    transition: "all 0.15s"
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.color = "var(--text)"}
+                  onMouseLeave={(e) => e.currentTarget.style.color = "var(--text-muted)"}
+                >
+                  🕓
+                </button>
+                {history.length > 0 && (
+                  <span className="nav-badge" style={{ 
+                    position: "absolute", 
+                    top: "4px", 
+                    right: "4px",
+                    background: "var(--accent)",
+                    color: "#090909",
+                    fontSize: "9px",
+                    minWidth: "16px",
+                    height: "16px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center"
+                  }}>
+                    {history.length}
+                  </span>
+                )}
+              </div>
+              
+              <div style={{ position: "relative" }}>
+                <button 
+                  type="button" 
+                  className="nav-icon-btn" 
+                  onClick={() => setShowWatchlistModal(true)}
+                  title="Watchlist"
+                  style={{ 
+                    background: "none", 
+                    border: "none", 
+                    color: "var(--text-muted)", 
+                    fontSize: "18px", 
+                    cursor: "pointer", 
+                    padding: "8px", 
+                    borderRadius: "6px",
+                    transition: "all 0.15s"
+                  }}
+                  onMouseEnter={(e) => e.currentTarget.style.color = "var(--text)"}
+                  onMouseLeave={(e) => e.currentTarget.style.color = "var(--text-muted)"}
+                >
+                  👁
+                </button>
+                {watchlist.length > 0 && (
+                  <span className="nav-badge" style={{ 
+                    position: "absolute", 
+                    top: "4px", 
+                    right: "4px",
+                    background: "var(--accent)",
+                    color: "#090909",
+                    fontSize: "9px",
+                    minWidth: "16px",
+                    height: "16px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center"
+                  }}>
+                    {watchlist.length}
+                  </span>
+                )}
+              </div>
+            </div>
+            
             <button type="button" className="btn-primary" onClick={scrollToForm}>Get Started Free →</button>
             
             {/* Mobile hamburger button */}
