@@ -159,9 +159,43 @@ const styles = `
     --text: #0a0a0a;
     --text-muted: #4a4a55;
     --text-dim: #8a8a98;
-    --accent: #c8b800;
-    --accent-dim: rgba(200,184,0,0.08);
-    --accent-glow: rgba(200,184,0,0.18);
+    --accent: #8a7a00;
+    --accent-dim: rgba(138,122,0,0.08);
+    --accent-glow: rgba(138,122,0,0.18);
+  }
+  
+  /* Light mode specific overrides */
+  [data-theme="light"] input,
+  [data-theme="light"] textarea,
+  [data-theme="light"] select {
+    background: #ffffff !important;
+    border: 1px solid #d1d1d6 !important;
+    color: #0a0a0a !important;
+  }
+  
+  [data-theme="light"] input::placeholder,
+  [data-theme="light"] textarea::placeholder {
+    color: #aaaaaa !important;
+  }
+  
+  [data-theme="light"] .btn-primary {
+    background: #0a0a0a !important;
+    color: #ffffff !important;
+    border: none !important;
+  }
+  
+  [data-theme="light"] .btn-primary:hover {
+    background: #222222 !important;
+  }
+  
+  [data-theme="light"] .form-card {
+    background: #f5f5f7 !important;
+    border: 1px solid #e0e0e5 !important;
+  }
+  
+  [data-theme="light"] .nav {
+    background: rgba(255,255,255,0.95) !important;
+    border-bottom: 1px solid #e0e0e5 !important;
   }
   .thead { background: #1a1a28; }
   .tbody tr:nth-child(odd) { background: #0f0f18; }
