@@ -611,7 +611,7 @@ const styles = `
       width: 100% !important; 
       max-width: none !important; 
     }
-    
+
     /* Mobile heatmap */
     .heatmap-grid { display: none; }
     .mobile-heatmap-cards { display: block; }
@@ -655,6 +655,10 @@ const styles = `
       font-family: var(--font-m); 
     }
   }
+
+  /* Desktop - hide mobile cards */
+  .mobile-table-cards { display: none; }
+  .mobile-heatmap-cards { display: none; }
   @media print {
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
     body > * { display: none !important; }
