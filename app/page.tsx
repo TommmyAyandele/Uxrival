@@ -1521,12 +1521,13 @@ export default function UXRival() {
     <!DOCTYPE html>
     <html>
     <head>
-      <title>UX Rival Report — ${reportData.category}</title>
+      <title>UX Rival Report — ${industry === "custom" ? customCategory : industry}</title>
       <style>
         body { font-family: Arial, sans-serif; padding: 32px; color: #0a0a0a; max-width: 900px; margin: 0 auto; }
         h1 { font-size: 24px; margin-bottom: 4px; }
         .meta { color: #888; font-size: 13px; margin-bottom: 24px; }
         .headline { font-size: 18px; font-weight: 700; border-left: 3px solid #0a0a0a; padding-left: 12px; margin-bottom: 24px; }
+        .summary { font-size: 14px; color: #666; margin-bottom: 24px; line-height: 1.5; }
         .scores { display: flex; gap: 16px; margin-bottom: 24px; }
         .score-card { border: 1px solid #e0e0e0; border-radius: 8px; padding: 14px 20px; text-align: center; min-width: 120px; }
         .score-card .name { font-size: 11px; color: #888; text-transform: uppercase; margin-bottom: 4px; }
@@ -1550,17 +1551,20 @@ export default function UXRival() {
       </style>
     </head>
     <body>
-      <h1>${reportData.category}</h1>
+      <h1>${industry === "custom" ? customCategory : industry}</h1>
       <div class="meta">Deep Teardown · ${reportData.comps.join(', ')}</div>
-      <div class="headline">${reportData.headline}</div>
-      <div class="scores">
-        ${Object.entries(reportData.scores || {}).map(([name, score]: [string, any]) => `
-          <div class="score-card">
-            <div class="name">${name}</div>
-            <div class="number" style="color: ${Number(score) >= 80 ? '#16a34a' : Number(score) >= 60 ? '#ca8a04' : '#dc2626'}">${score}</div>
-          </div>
-        `).join('')}
-      </div>
+      ${reportData.headline ? `<div class="headline">${reportData.headline}</div>` : ""}
+      ${reportData.sum ? `<div class="summary"><strong>Overview — </strong>${reportData.sum}</div>` : ""}
+      ${reportData.scores ? `
+        <div class="scores">
+          ${Object.entries(reportData.scores).map(([name, score]: [string, any]) => `
+            <div class="score-card">
+              <div class="name">${name}</div>
+              <div class="number" style="color: ${Number(score) >= 80 ? '#16a34a' : Number(score) >= 60 ? '#ca8a04' : '#dc2626'}">${score}</div>
+            </div>
+          `).join('')}
+        </div>
+      ` : ""}
       <table>
         <thead>
           <tr>
