@@ -526,6 +526,135 @@ const styles = `
   .fade-up { animation: fadeUp 0.4s ease; }
   @media (max-width: 860px) { .hero-split { grid-template-columns: 1fr; gap: 36px; } .hero-right { position: static; } .steps { grid-template-columns: 1fr !important; } .step:not(:last-child) { border-right: none; border-bottom: 1px solid var(--border); } }
   @media (max-width: 640px) { .page { padding: 0 18px 100px; } .nav-links { display: none; } .theme-toggle { display: none; } .nav-right .btn-primary { display: none; } .mobile-hamburger { display: flex; } .steps { grid-template-columns: 1fr; } .step:not(:last-child) { border-right: none; border-bottom: 1px solid var(--border); } .form-card { padding: 22px 18px; } .form-footer { flex-direction: column; align-items: stretch; } .radio-group { flex-direction: column; } .report-header { flex-direction: column; } .modal-actions { flex-wrap: wrap; } }
+  
+  /* Mobile table layout - below 768px */
+  @media (max-width: 768px) {
+    .table-scroll { overflow-x: visible; }
+    .table-scroll table { display: none; }
+    
+    .mobile-table-cards { display: block; }
+    .mobile-section-header { 
+      background: var(--surface2); 
+      border: 1px solid var(--border); 
+      border-radius: 8px; 
+      padding: 12px 16px; 
+      margin-bottom: 12px; 
+      font-family: var(--font-m); 
+      font-size: 10px; 
+      font-weight: 600; 
+      letter-spacing: 0.1em; 
+      text-transform: uppercase; 
+      color: var(--text-muted); 
+    }
+    .mobile-dimension-card { 
+      background: var(--surface2); 
+      border: 1px solid var(--border); 
+      border-radius: 10px; 
+      padding: 14px; 
+      margin-bottom: 12px; 
+    }
+    .mobile-dimension-header { 
+      font-family: var(--font-m); 
+      font-size: 11px; 
+      font-weight: 600; 
+      color: var(--text); 
+      margin-bottom: 12px; 
+      text-transform: uppercase; 
+      letter-spacing: 0.05em; 
+    }
+    .mobile-competitor-row { 
+      display: flex; 
+      align-items: center; 
+      gap: 8px; 
+      margin-bottom: 8px; 
+      padding: 6px 0; 
+    }
+    .mobile-competitor-name { 
+      font-size: 12px; 
+      color: var(--text-muted); 
+      min-width: 80px; 
+    }
+    .mobile-content-section { 
+      margin-top: 12px; 
+      padding-top: 12px; 
+      border-top: 1px solid var(--border); 
+    }
+    .mobile-insight { 
+      font-size: 13px; 
+      color: var(--text-muted); 
+      margin-bottom: 8px; 
+      line-height: 1.5; 
+    }
+    .mobile-move { 
+      font-size: 13px; 
+      color: var(--accent); 
+      font-weight: 600; 
+      line-height: 1.5; 
+    }
+    .mobile-steal-tag { 
+      display: inline-block; 
+      background: var(--accent-dim); 
+      color: var(--accent); 
+      padding: 4px 8px; 
+      border-radius: 4px; 
+      font-size: 11px; 
+      margin-top: 6px; 
+    }
+    
+    /* Mobile score cards - stack vertically */
+    .score-cards-row { 
+      display: flex !important; 
+      flex-direction: column !important; 
+      gap: 12px !important; 
+    }
+    .score-card { 
+      width: 100% !important; 
+      max-width: none !important; 
+    }
+    
+    /* Mobile heatmap */
+    .heatmap-grid { display: none; }
+    .mobile-heatmap-cards { display: block; }
+    .mobile-heatmap-card { 
+      background: var(--surface2); 
+      border: 1px solid var(--border); 
+      border-radius: 10px; 
+      padding: 14px; 
+      margin-bottom: 12px; 
+    }
+    .mobile-heatmap-dimension { 
+      font-family: var(--font-m); 
+      font-size: 11px; 
+      font-weight: 600; 
+      color: var(--text); 
+      margin-bottom: 8px; 
+      text-transform: uppercase; 
+      letter-spacing: 0.05em; 
+    }
+    .mobile-heatmap-pills { 
+      display: flex; 
+      flex-direction: column; 
+      gap: 6px; 
+    }
+    .mobile-heatmap-pill { 
+      display: flex; 
+      align-items: center; 
+      gap: 8px; 
+      padding: 6px 0; 
+    }
+    .mobile-heatmap-name { 
+      font-size: 12px; 
+      color: var(--text-muted); 
+      min-width: 80px; 
+    }
+    .mobile-heatmap-rating { 
+      padding: 4px 8px; 
+      border-radius: 4px; 
+      font-size: 11px; 
+      font-weight: 600; 
+      font-family: var(--font-m); 
+    }
+  }
   @media print {
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
     body > * { display: none !important; }
@@ -579,6 +708,49 @@ function ReportTable({ data, myProduct }: { data: any; myProduct?: string }) {
     : data.category_score != null
       ? [{ name: "Overall", score: Number(data.category_score) }]
       : [];
+  
+  // Mobile card layout
+  const MobileTableCards = () => (
+    <div className="mobile-table-cards">
+      {data.secs?.map((sec: any, si: number) => (
+        <React.Fragment key={`mobile-sec-${si}`}>
+          <div className="mobile-section-header">{sec.cat}</div>
+          {sec.rows?.map((row: any, ri: number) => (
+            <div key={`mobile-${si}-${ri}`} className="mobile-dimension-card">
+              <div className="mobile-dimension-header">{row.dim}</div>
+              
+              {hasC ? (
+                <div>
+                  {data.comps.map((c: string, ci: number) => {
+                    const s = row.sc?.[c] || {};
+                    return (
+                      <div key={c} className="mobile-competitor-row">
+                        <span className="mobile-competitor-name">{c}{firstIsYou && ci === 0 && " (You)"}</span>
+                        <RatingBadge rating={s.r} />
+                        {s.n && <span className="mobile-score-note">{s.n}</span>}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="mobile-competitor-row">
+                  <span className="mobile-competitor-name">Current</span>
+                  <RatingBadge rating={row.r} />
+                </div>
+              )}
+              
+              <div className="mobile-content-section">
+                {hasC && row.ins && <div className="mobile-insight">{row.ins}</div>}
+                <div className="mobile-move">{row.rec}</div>
+                {row.steal && <div className="mobile-steal-tag">💡 {row.steal}</div>}
+              </div>
+            </div>
+          ))}
+        </React.Fragment>
+      ))}
+    </div>
+  );
+  
   return (
     <div>
       {data.headline && <div className="headline-band fade-up">{data.headline}</div>}
@@ -603,9 +775,17 @@ function ReportTable({ data, myProduct }: { data: any; myProduct?: string }) {
               <tr>
                 <th>Dimension</th>
                 {hasC ? (
-                  <>{data.comps.map((c: string, ci: number) => <th key={c} className={`comp-th${firstIsYou && ci === 0 ? " you-col" : ""}`}>{c}{firstIsYou && ci === 0 && <span className="you-badge">You</span>}</th>)}<th className="wide-th">Key Insight</th><th className="rec-th">Your Move ✦</th></>
+                  <>
+                    {data.comps.map((c: string, ci: number) => <th key={c} className={`comp-th${firstIsYou && ci === 0 ? " you-col" : ""}`}>{c}{firstIsYou && ci === 0 && <span className="you-badge">You</span>}</th>)}
+                    <th className="wide-th">Key Insight</th>
+                    <th className="rec-th">Your Move ✦</th>
+                  </>
                 ) : (
-                  <><th className="wide-th">Current Pattern</th><th>Rating</th><th className="rec-th">Your Move ✦</th></>
+                  <>
+                    <th className="wide-th">Current Pattern</th>
+                    <th>Rating</th>
+                    <th className="rec-th">Your Move ✦</th>
+                  </>
                 )}
               </tr>
             </thead>
@@ -617,9 +797,20 @@ function ReportTable({ data, myProduct }: { data: any; myProduct?: string }) {
                     <tr key={`${si}-${ri}`}>
                       <td className="dim-cell">{row.dim}</td>
                       {hasC ? (
-                        <>{data.comps.map((c: string, ci: number) => { const s = row.sc?.[c] || {}; return <td key={c} className={`score-cell${firstIsYou && ci === 0 ? " you-col" : ""}`}><div className="score-block"><RatingBadge rating={s.r} />{s.n && <span className="score-note">{s.n}</span>}</div></td>; })}<td className="text-cell">{row.ins}</td><td className="rec-cell"><div>{row.rec}{row.steal && <div className="steal-tag">💡 {row.steal}</div>}</div></td></>
+                        <>
+                          {data.comps.map((c: string, ci: number) => { 
+                            const s = row.sc?.[c] || {}; 
+                            return <td key={c} className={`score-cell${firstIsYou && ci === 0 ? " you-col" : ""}`}><div className="score-block"><RatingBadge rating={s.r} />{s.n && <span className="score-note">{s.n}</span>}</div></td>; 
+                          })}
+                          <td className="text-cell">{row.ins}</td>
+                          <td className="rec-cell"><div>{row.rec}{row.steal && <div className="steal-tag">💡 {row.steal}</div>}</div></td>
+                        </>
                       ) : (
-                        <><td className="text-cell">{row.find}</td><td className="score-cell"><RatingBadge rating={row.r} /></td><td className="rec-cell"><div>{row.rec}{row.steal && <div className="steal-tag">💡 {row.steal}</div>}</div></td></>
+                        <>
+                          <td className="text-cell">{row.find}</td>
+                          <td className="score-cell"><RatingBadge rating={row.r} /></td>
+                          <td className="rec-cell"><div>{row.rec}{row.steal && <div className="steal-tag">💡 {row.steal}</div>}</div></td>
+                        </>
                       )}
                     </tr>
                   ))}
@@ -627,6 +818,7 @@ function ReportTable({ data, myProduct }: { data: any; myProduct?: string }) {
               ))}
             </tbody>
           </table>
+          <MobileTableCards />
         </div>
         {data.opp && <div className="opp-band"><span className="opp-label">Gap</span><span className="opp-text">{data.opp}</span></div>}
       </div>
@@ -656,6 +848,39 @@ function HeatmapView({ data, myProduct }: { data: any; myProduct?: string }) {
     if (hasC) return row.sc?.[col]?.r || "";
     return row.r || "";
   };
+  
+  // Mobile heatmap cards
+  const MobileHeatmapCards = () => (
+    <div className="mobile-heatmap-cards">
+      {flatRows.map((r, ri) => (
+        <div key={ri} className="mobile-heatmap-card">
+          <div className="mobile-heatmap-dimension">{r.dim}</div>
+          <div className="mobile-heatmap-pills">
+            {cols.map((colKey: string, ci: number) => {
+              const rating = getCellRating(r.row, colKey);
+              const bg = RATING_COLORS[rating] || "var(--surface2)";
+              return (
+                <div key={colKey} className="mobile-heatmap-pill">
+                  <span className="mobile-heatmap-name">{colKey}{firstIsYou && ci === 0 && " (You)"}</span>
+                  <span 
+                    className="mobile-heatmap-rating" 
+                    style={{ 
+                      background: bg, 
+                      color: rating ? "#090909" : "var(--text-muted)",
+                      border: `1px solid ${bg}`
+                    }}
+                  >
+                    {rating || "—"}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+  
   return (
     <div>
       {data.headline && <div className="headline-band fade-up">{data.headline}</div>}
@@ -701,6 +926,7 @@ function HeatmapView({ data, myProduct }: { data: any; myProduct?: string }) {
           </React.Fragment>
         ))}
       </div>
+      <MobileHeatmapCards />
       {data.opp && <div className="opp-band" style={{ marginTop: 16 }}><span className="opp-label">Gap</span><span className="opp-text">{data.opp}</span></div>}
     </div>
   );
