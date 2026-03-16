@@ -278,7 +278,7 @@ const styles = `
   .sec-row td { background: #1e1e2e !important; color: var(--text-muted); }
   .modal-content { background: var(--surface); }
   .modal-overlay { background: rgba(0,0,0,0.4); }
-  .summary-strip { background: #0f0f18; border-color: #2a2a3a; }
+  .summary-strip { background: var(--surface); border-color: var(--border); }
   .table-outer { border-color: #2a2a3a; }
   .opp-band { background: rgba(180,160,0,0.08); }
   .score-note { color: #888; }
