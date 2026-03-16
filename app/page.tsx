@@ -271,15 +271,15 @@ const styles = `
   [data-theme="light"] .rec-cell { color: #5b21b6 !important; }
   [data-theme="light"] .opp-band { background: #fffbeb !important; border-color: #ca8a04 !important; }
   [data-theme="light"] .score-note { color: #666666 !important; }
-  .thead { background: #1a1a28; }
+  .thead { background: var(--surface3); }
   .tbody tr:nth-child(odd) { background: var(--surface); }
   .tbody tr:nth-child(even) { background: var(--surface2); }
-  .tbody tr:hover { background: #1e1e2e; }
-  .sec-row td { background: #1e1e2e !important; color: var(--text-muted); }
+  .tbody tr:hover { background: var(--surface3); }
+  .sec-row td { background: var(--surface3) !important; color: var(--text-muted); }
   .modal-content { background: var(--surface); }
   .modal-overlay { background: rgba(0,0,0,0.4); }
   .summary-strip { background: var(--surface); border-color: var(--border); }
-  .table-outer { border-color: #2a2a3a; }
+  .table-outer { border-color: var(--border); }
   .opp-band { background: rgba(180,160,0,0.08); }
   .score-note { color: #888; }
   td.text-cell { color: #555; }
@@ -458,7 +458,7 @@ const styles = `
   .table-outer.has-sum { border-radius: 0 0 var(--radius) var(--radius); }
   .table-scroll { overflow-x: auto; scrollbar-width: thin; }
   table { width: 100%; border-collapse: collapse; min-width: 600px; }
-  thead { background: #0c0c0e; }
+  thead { background: var(--surface3); }
   thead th { padding: 12px 16px; font-family: var(--font-m); font-size: 10px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
   thead th:first-child { color: var(--text-dim); width: 130px; }
   thead th.comp-th { color: var(--accent); }
