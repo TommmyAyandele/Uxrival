@@ -259,6 +259,18 @@ const styles = `
   [data-theme="light"] .btn-secondary:hover {
     border-color: #0a0a0a !important;
   }
+  [data-theme="light"] .score-card { background: #f5f5f7 !important; border: 1px solid #e0e0e5 !important; }
+  [data-theme="light"] .score-card-name { color: #888888 !important; }
+  [data-theme="light"] .table-outer { background: #ffffff !important; border-color: #e0e0e5 !important; }
+  [data-theme="light"] .thead { background: #1a1a1a !important; }
+  [data-theme="light"] .tbody tr:nth-child(odd) { background: #ffffff !important; }
+  [data-theme="light"] .tbody tr:nth-child(even) { background: #fafafa !important; }
+  [data-theme="light"] .tbody tr:hover { background: #f5f5f7 !important; }
+  [data-theme="light"] .sec-row td { background: #f0f0f0 !important; color: #666666 !important; }
+  [data-theme="light"] .steal-tag { background: #f0eeff !important; color: #5b21b6 !important; border-color: #d4c8ff !important; }
+  [data-theme="light"] .rec-cell { color: #5b21b6 !important; }
+  [data-theme="light"] .opp-band { background: #fffbeb !important; border-color: #ca8a04 !important; }
+  [data-theme="light"] .score-note { color: #666666 !important; }
   .thead { background: #1a1a28; }
   .tbody tr:nth-child(odd) { background: #0f0f18; }
   .tbody tr:nth-child(even) { background: #13131e; }
