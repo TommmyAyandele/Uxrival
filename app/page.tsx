@@ -784,6 +784,7 @@ function ReportTable({ data, myProduct }: { data: any; myProduct?: string }) {
           ))}
         </div>
       )}
+      <MobileTableCards />
       <div className={`table-outer fade-up${data.sum ? " has-sum" : ""}`}>
         <div className="table-scroll">
           <table>
@@ -835,7 +836,6 @@ function ReportTable({ data, myProduct }: { data: any; myProduct?: string }) {
             </tbody>
           </table>
         </div>
-          <MobileTableCards />
         {data.opp && <div className="opp-band"><span className="opp-label">Gap</span><span className="opp-text">{data.opp}</span></div>}
       </div>
     </div>
