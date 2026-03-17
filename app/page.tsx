@@ -4,7 +4,6 @@ import { useSearchParams } from "next/navigation";
 
 const EMAIL_STORAGE_KEY = "uxrival_email";
 const WATCHLIST_STORAGE_KEY = "uxrival_watchlist";
-const THEME_STORAGE_KEY = "uxrival_theme";
 const TOUR_STORAGE_KEY = "uxrival_toured";
 const HISTORY_STORAGE_KEY = "uxrival_history";
 
@@ -355,7 +354,6 @@ const styles = `
   .mobile-menu-item { height: 48px; display: flex; align-items: center; font-size: 16px; color: var(--text); border-bottom: 1px solid var(--border); cursor: pointer; transition: color 0.15s; }
   .mobile-menu-item:hover { color: var(--accent); }
   
-  .mobile-theme-toggle { display: flex; padding: 20px 0; gap: 8px; }
   .mobile-menu-cta { margin-top: auto; padding-top: 20px; }
   .theme-toggle { display: inline-flex; padding: 3px; background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; gap: 0; }
   .theme-toggle-option { font-family: var(--font-m); font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 16px; background: transparent; border: none; cursor: pointer; transition: all 0.15s; }
@@ -1221,7 +1219,6 @@ function IndustryDropdown({ value, customValue, onChange, onCustomChange }: {
 
 export default function UXRival() {
   const searchParams = useSearchParams();
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [showTour, setShowTour] = useState(false);
   const [tourStep, setTourStep] = useState(0);
   const [showHistoryModal, setShowHistoryModal] = useState(false);
@@ -1293,19 +1290,7 @@ export default function UXRival() {
     }
   }, [showWatchForm]);
 
-  useEffect(() => {
-    const savedTheme = localStorage.getItem(THEME_STORAGE_KEY) as "dark" | "light" | null;
-    if (savedTheme) {
-      setTheme(savedTheme);
-    }
-  }, []);
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      document.documentElement.setAttribute("data-theme", theme);
-      localStorage.setItem(THEME_STORAGE_KEY, theme);
-    }
-  }, [theme]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -1318,7 +1303,6 @@ export default function UXRival() {
   }, []);
 
   const toggleTheme = () => {
-    setTheme(theme === "dark" ? "light" : "dark");
   };
 
   const handleTourNext = () => {
@@ -1623,10 +1607,6 @@ export default function UXRival() {
               <span className="nav-link" onClick={scrollToLearn}>Features</span>
               <span className="nav-link" onClick={() => window.location.href = "/developers"}>API</span>
             </div>
-            <div className="theme-toggle">
-              <button type="button" className={`theme-toggle-option${theme === "dark" ? " active" : ""}`} onClick={() => setTheme("dark")}>Dark</button>
-              <button type="button" className={`theme-toggle-option${theme === "light" ? " active" : ""}`} onClick={() => setTheme("light")}>Light</button>
-            </div>
             
             {/* History and Watchlist icon buttons */}
             <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
@@ -1771,11 +1751,6 @@ export default function UXRival() {
                 <div className="mobile-menu-item" onClick={() => { setMobileMenuOpen(false); setShowWatchlistModal(true); }}>Watchlist{watchlist.length > 0 && <span className="nav-badge">{watchlist.length}</span>}</div>
                 <div className="mobile-menu-item" onClick={() => { setMobileMenuOpen(false); setShowHistoryModal(true); }}>History{history.length > 0 && <span className="nav-badge" style={{ background: "var(--surface2)", color: "var(--text-muted)" }}>{history.length}</span>}</div>
                 <div className="mobile-menu-item" onClick={() => { setMobileMenuOpen(false); window.location.href = "/developers"; }}>API</div>
-                
-                <div className="mobile-theme-toggle">
-                  <button type="button" className={`theme-toggle-option${theme === "dark" ? " active" : ""}`} onClick={() => setTheme("dark")}>Dark</button>
-                  <button type="button" className={`theme-toggle-option${theme === "light" ? " active" : ""}`} onClick={() => setTheme("light")}>Light</button>
-                </div>
                 
                 <div className="mobile-menu-cta">
                   <button type="button" className="btn-primary" onClick={() => { setMobileMenuOpen(false); scrollToForm(); }}>Get Started Free →</button>
