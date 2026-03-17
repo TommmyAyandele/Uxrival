@@ -540,6 +540,7 @@ const styles = `
   @media (max-width: 640px) { .page { padding: 0 18px 100px; } .nav-links { display: none; } .theme-toggle { display: none; } .nav-right .btn-primary { display: none; } .mobile-hamburger { display: flex; } .steps { grid-template-columns: 1fr; } .step:not(:last-child) { border-right: none; border-bottom: 1px solid var(--border); } .form-card { padding: 22px 18px; } .form-footer { flex-direction: column; align-items: stretch; } .radio-group { flex-direction: column; } .report-header { flex-direction: column; } .modal-actions { flex-wrap: wrap; } }
   
   /* Mobile table layout - below 768px */
+  @media (min-width: 769px) { .mobile-table-cards { display: none !important; } }
   @media (max-width: 768px) {
     .table-scroll { overflow-x: visible; }
     .table-scroll table { display: none; }
@@ -669,7 +670,7 @@ const styles = `
   }
 
   /* Desktop - hide mobile cards */
-  .mobile-table-cards { display: none; }
+  .mobile-table-cards { display: none; } /* moved to desktop only */
   .mobile-heatmap-cards { display: none; }
   @media print {
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
