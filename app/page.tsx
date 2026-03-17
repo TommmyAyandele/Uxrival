@@ -1334,7 +1334,8 @@ export default function UXRival() {
     };
     
     const currentHistory = loadHistory();
-    const updatedHistory = [newItem, ...currentHistory].slice(0, 10);
+    const deduped = currentHistory.filter(h => !(h.category === effectiveCategory && h.competitors === competitors));
+    const updatedHistory = [newItem, ...deduped].slice(0, 10);
     setHistory(updatedHistory);
     saveHistory(updatedHistory);
   };
