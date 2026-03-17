@@ -669,8 +669,7 @@ const styles = `
     }
   }
 
-  /* Desktop - hide mobile cards */
-  .mobile-table-cards { display: none; } /* moved to desktop only */
+  /* Desktop - hide mobile cards */ /* moved to desktop only */
   .mobile-heatmap-cards { display: none; }
   @media print {
     * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
