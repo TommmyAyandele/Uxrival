@@ -1835,15 +1835,15 @@ export default function UXRival() {
           <div className="modal-overlay">
             <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 440 }}>
               <div className="modal-header" style={{ padding: "24px 24px 0" }}>
-                <div className="report-title" style={{ marginBottom: 8 }}>Get your free report</div>
-                <p className="form-hint" style={{ marginBottom: 24 }}>Join 100+ designers getting UX insights</p>
+                <div className="report-title" style={{ marginBottom: 8 }}>Where should we send your report?</div>
+                <p className="form-hint" style={{ marginBottom: 24 }}>No account needed. No verification email. Your report will be ready instantly.</p>
               </div>
               <div style={{ padding: "0 24px 24px" }}>
                 <div className="form-row">
                   <span className="field-label">Email</span>
                   <input type="email" placeholder="you@company.com" value={emailInput} onChange={(e) => setEmailInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleEmailSubmit()} style={{ width: "100%", background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 10, color: "var(--text)", fontFamily: "var(--font-d)", fontSize: 15, padding: "13px 16px", outline: "none" }} />
                 </div>
-                <button type="button" className="btn-primary" onClick={handleEmailSubmit} disabled={!emailInput.trim()} style={{ width: "100%", marginTop: 8 }}>Get My Report →</button>
+                <button type="button" className="btn-primary" onClick={handleEmailSubmit} disabled={!emailInput.trim()} style={{ width: "100%", marginTop: 8 }}>Show my report →</button>
               </div>
             </div>
           </div>
