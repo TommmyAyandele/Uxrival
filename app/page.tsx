@@ -2,11 +2,11 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 
-const EMAIL_STORAGE_KEY = "uxrival_email";
-const SURVEY_STORAGE_KEY = "uxrival_survey_done";
-const WATCHLIST_STORAGE_KEY = "uxrival_watchlist";
+const EMAIL_STORAGE_KEY = "uxrival_email_v2";
+const SURVEY_STORAGE_KEY = "uxrival_survey_done_v2";
+const WATCHLIST_STORAGE_KEY = "uxrival_watchlist_v2";
 const TOUR_STORAGE_KEY = "uxrival_toured";
-const HISTORY_STORAGE_KEY = "uxrival_history";
+const HISTORY_STORAGE_KEY = "uxrival_history_v2";
 
 type WatchlistItem = { id: string; category: string; competitors: string; depth: string; email: string; frequency: string; savedAt: string; reportData: any | null };
 type HistoryItem = { id: string; category: string; competitors: string; depth: string; reportData: any; createdAt: string };
