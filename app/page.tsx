@@ -1829,8 +1829,17 @@ export default function UXRival() {
           </div>
         </section>
 
-        {loading && <div className="loading-state"><div className="loading-spinner" /><div className="loading-label"><span className="loading-dots">Analyzing UX patterns</span></div></div>}
+
         {errorMsg && !loading && <div className="error-state"><span className="error-icon">⚠</span><div><div className="error-title">Analysis failed</div><div className="error-msg">{errorMsg}</div></div></div>}
+        {loading && (
+          <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", zIndex: 1500, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 24 }}>
+            <div style={{ width: 48, height: 48, border: "3px solid var(--border)", borderTop: "3px solid var(--accent)", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
+            <div style={{ textAlign: "center" }}>
+              <div style={{ fontFamily: "var(--font-d)", fontSize: 18, fontWeight: 700, color: "var(--text)", marginBottom: 8 }}>Analyzing...</div>
+              <div style={{ fontFamily: "var(--font-m)", fontSize: 12, color: "var(--text-muted)" }}>{depth === "deep" ? "Deep Teardown · ~25s" : "Quick Scan · ~10s"}</div>
+            </div>
+          </div>
+        )}
         {showEmailModal && pendingReportData && (
           <div className="modal-overlay">
             <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 440 }}>
