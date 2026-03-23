@@ -1488,6 +1488,9 @@ export default function UXRival() {
       
       if (typeof window !== "undefined" && localStorage.getItem(EMAIL_STORAGE_KEY)) {
         setReportData(data);
+        setTimeout(() => {
+          if (!localStorage.getItem(SURVEY_STORAGE_KEY)) setShowSurvey(true);
+        }, 4000);
       } else {
         setPendingReportData(data);
         setShowEmailModal(true);
@@ -1518,6 +1521,9 @@ export default function UXRival() {
     }).catch(() => {});
     setReportData(pendingReportData);
     setPendingReportData(null);
+    setTimeout(() => {
+      if (!localStorage.getItem(SURVEY_STORAGE_KEY)) setShowSurvey(true);
+    }, 4000);
     setShowEmailModal(false);
     setEmailInput("");
   };
