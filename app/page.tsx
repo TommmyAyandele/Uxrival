@@ -2161,9 +2161,7 @@ const data = await res.json();`}</pre>
           )}
         </div>
       )}
-      {toastMsg && <div className="toast">{toastMsg}</div>}
-      
-      {showTour && tourStep < tourSteps.length && (
+            {showTour && tourStep < tourSteps.length && (
         <TourTooltip
           step={tourStep + 1}
           total={tourSteps.length}
