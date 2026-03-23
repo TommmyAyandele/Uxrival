@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 
 const EMAIL_STORAGE_KEY = "uxrival_email";
+const SURVEY_STORAGE_KEY = "uxrival_survey_done";
 const WATCHLIST_STORAGE_KEY = "uxrival_watchlist";
 const TOUR_STORAGE_KEY = "uxrival_toured";
 const HISTORY_STORAGE_KEY = "uxrival_history";
@@ -1232,6 +1233,9 @@ export default function UXRival() {
   const [reportData, setReportData] = useState<any>(null);
   const [pendingReportData, setPendingReportData] = useState<any>(null);
   const [showEmailModal, setShowEmailModal] = useState(false);
+  const [showSurvey, setShowSurvey] = useState(false);
+  const [surveyStep, setSurveyStep] = useState(0);
+  const [surveyAnswers, setSurveyAnswers] = useState<{role?: string; source?: string; suggestion?: string}>({});
   const [emailInput, setEmailInput] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [copied, setCopied] = useState(false);
@@ -1349,6 +1353,9 @@ export default function UXRival() {
 
   const viewHistoryReport = (item: HistoryItem) => {
     setReportData(item.reportData);
+    setTimeout(() => {
+      if (!localStorage.getItem(SURVEY_STORAGE_KEY)) setShowSurvey(true);
+    }, 4000);
     setShowHistoryModal(false);
   };
 
@@ -2066,6 +2073,88 @@ const data = await res.json();`}</pre>
         </div>
       )}
 
+      {showSurvey && (
+        <div style={{ position: "fixed", bottom: 24, right: 24, width: 320, background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 14, padding: 20, zIndex: 2000, boxShadow: "0 8px 32px rgba(0,0,0,0.4)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+            <span style={{ fontFamily: "var(--font-m)", fontSize: 10, color: "var(--accent)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Quick feedback</span>
+            <button type="button" onClick={() => { setShowSurvey(false); localStorage.setItem(SURVEY_STORAGE_KEY, "true"); }} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 18 }}>×</button>
+          </div>
+          {surveyStep === 0 && (
+            <div>
+              <p style={{ fontSize: 13, fontWeight: 700, marginBottom: 12, color: "var(--text)" }}>What best describes you?</p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {["Product Designer", "UX Designer", "Founder", "Developer", "Agency", "Other"].map(role => (
+                  <button key={role} type="button" onClick={() => { setSurveyAnswers(p => ({ ...p, role })); setSurveyStep(1); }} style={{ padding: "6px 12px", borderRadius: 20, border: "1px solid var(--border)", background: "var(--surface3)", color: "var(--text)", fontSize: 12, cursor: "pointer" }}>{role}</button>
+                ))}
+              </div>
+            </div>
+          )}
+          {surveyStep === 1 && (
+            <div>
+              <p style={{ fontSize: 13, fontWeight: 700, marginBottom: 12, color: "var(--text)" }}>How did you find UX Rival?</p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {["Twitter/X", "LinkedIn", "Google", "Friend/Colleague", "Product Hunt", "Other"].map(source => (
+                  <button key={source} type="button" onClick={() => { setSurveyAnswers(p => ({ ...p, source })); setSurveyStep(2); }} style={{ padding: "6px 12px", borderRadius: 20, border: "1px solid var(--border)", background: "var(--surface3)", color: "var(--text)", fontSize: 12, cursor: "pointer" }}>{source}</button>
+                ))}
+              </div>
+            </div>
+          )}
+          {surveyStep === 2 && (
+            <div>
+              <p style={{ fontSize: 13, fontWeight: 700, marginBottom: 12, color: "var(--text)" }}>What would make UX Rival more useful?</p>
+              <textarea placeholder="e.g. more industries, team collaboration..." rows={3} style={{ width: "100%", background: "var(--surface3)", border: "1px solid var(--border)", borderRadius: 8, color: "var(--text)", fontSize: 13, padding: "10px 12px", resize: "none", fontFamily: "var(--font-d)", outline: "none", boxSizing: "border-box" }} onChange={(e) => setSurveyAnswers(p => ({ ...p, suggestion: e.target.value }))} />
+              <button type="button" className="btn-primary" onClick={() => {
+                setShowSurvey(false);
+                localStorage.setItem(SURVEY_STORAGE_KEY, "true");
+                setToastMsg("Thanks for your feedback 🙏");
+                setTimeout(() => setToastMsg(""), 3000);
+                fetch("/api/feedback", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(surveyAnswers) }).catch(() => {});
+              }} style={{ width: "100%", marginTop: 10 }}>Send feedback →</button>
+            </div>
+          )}
+        </div>
+      )}
+      {showSurvey && (
+        <div style={{ position: "fixed", bottom: 24, right: 24, width: 320, background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 14, padding: 20, zIndex: 2000, boxShadow: "0 8px 32px rgba(0,0,0,0.4)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
+            <span style={{ fontFamily: "var(--font-m)", fontSize: 10, color: "var(--accent)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Quick feedback</span>
+            <button type="button" onClick={() => { setShowSurvey(false); localStorage.setItem(SURVEY_STORAGE_KEY, "true"); }} style={{ background: "none", border: "none", color: "var(--text-muted)", cursor: "pointer", fontSize: 18 }}>×</button>
+          </div>
+          {surveyStep === 0 && (
+            <div>
+              <p style={{ fontSize: 13, fontWeight: 700, marginBottom: 12, color: "var(--text)" }}>What best describes you?</p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {["Product Designer", "UX Designer", "Founder", "Developer", "Agency", "Other"].map(role => (
+                  <button key={role} type="button" onClick={() => { setSurveyAnswers(p => ({ ...p, role })); setSurveyStep(1); }} style={{ padding: "6px 12px", borderRadius: 20, border: "1px solid var(--border)", background: "var(--surface3)", color: "var(--text)", fontSize: 12, cursor: "pointer" }}>{role}</button>
+                ))}
+              </div>
+            </div>
+          )}
+          {surveyStep === 1 && (
+            <div>
+              <p style={{ fontSize: 13, fontWeight: 700, marginBottom: 12, color: "var(--text)" }}>How did you find UX Rival?</p>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                {["Twitter/X", "LinkedIn", "Google", "Friend/Colleague", "Product Hunt", "Other"].map(source => (
+                  <button key={source} type="button" onClick={() => { setSurveyAnswers(p => ({ ...p, source })); setSurveyStep(2); }} style={{ padding: "6px 12px", borderRadius: 20, border: "1px solid var(--border)", background: "var(--surface3)", color: "var(--text)", fontSize: 12, cursor: "pointer" }}>{source}</button>
+                ))}
+              </div>
+            </div>
+          )}
+          {surveyStep === 2 && (
+            <div>
+              <p style={{ fontSize: 13, fontWeight: 700, marginBottom: 12, color: "var(--text)" }}>What would make UX Rival more useful?</p>
+              <textarea placeholder="e.g. more industries, team collaboration..." rows={3} style={{ width: "100%", background: "var(--surface3)", border: "1px solid var(--border)", borderRadius: 8, color: "var(--text)", fontSize: 13, padding: "10px 12px", resize: "none", fontFamily: "var(--font-d)", outline: "none", boxSizing: "border-box" }} onChange={(e) => setSurveyAnswers(p => ({ ...p, suggestion: e.target.value }))} />
+              <button type="button" className="btn-primary" onClick={() => {
+                setShowSurvey(false);
+                localStorage.setItem(SURVEY_STORAGE_KEY, "true");
+                setToastMsg("Thanks for your feedback 🙏");
+                setTimeout(() => setToastMsg(""), 3000);
+                fetch("/api/feedback", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(surveyAnswers) }).catch(() => {});
+              }} style={{ width: "100%", marginTop: 10 }}>Send feedback →</button>
+            </div>
+          )}
+        </div>
+      )}
       {toastMsg && <div className="toast">{toastMsg}</div>}
       
       {showTour && tourStep < tourSteps.length && (
