@@ -1488,6 +1488,22 @@ export default function UXRival() {
       
       if (typeof window !== "undefined" && localStorage.getItem(EMAIL_STORAGE_KEY)) {
         setReportData(data);
+        // Auto-send report to stored email
+        const storedEmail = localStorage.getItem(EMAIL_STORAGE_KEY);
+        if (storedEmail) {
+          fetch('/api/watchlist', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              email: storedEmail,
+              category: effectiveCategory,
+              competitors,
+              depth,
+              frequency: 'once',
+              reportData: data
+            })
+          }).catch(() => {});
+        }
         setTimeout(() => {
           if (!localStorage.getItem(SURVEY_STORAGE_KEY)) setShowSurvey(true);
         }, 4000);
