@@ -849,6 +849,96 @@ const RATING_COLORS: Record<string, string> = {
   Weak: "#f87171",
 };
 
+
+function RadarChart({ data, myProduct }: { data: any; myProduct?: string }) {
+  const hasC = data.comps && data.comps.length > 0;
+  if (!hasC || !data.secs) return null;
+  const ratingToScore = (r: string) => {
+    const map: Record<string, number> = { Excellent: 100, Good: 75, Average: 50, Poor: 25, Weak: 10 };
+    return map[r] || 0;
+  };
+  const dimensions: string[] = [];
+  data.secs.forEach((sec: any) => { sec.rows?.forEach((row: any) => { dimensions.push(row.dim); }); });
+  const competitorScores: Record<string, number[]> = {};
+  data.comps.forEach((comp: string) => {
+    competitorScores[comp] = [];
+    data.secs.forEach((sec: any) => { sec.rows?.forEach((row: any) => { competitorScores[comp].push(ratingToScore(row.sc?.[comp]?.r || "")); }); });
+  });
+  const colors = ["#e8ff47", "#4ade80", "#f97316", "#a78bfa", "#f87171"];
+  const size = 340; const center = size / 2; const radius = 120; const numDims = dimensions.length;
+  const getPoints = (scores: number[]) => scores.map((score, i) => {
+    const angle = (Math.PI * 2 * i) / numDims - Math.PI / 2;
+    const r = (score / 100) * radius;
+    return [center + r * Math.cos(angle), center + r * Math.sin(angle)];
+  });
+  const rings = [25, 50, 75, 100];
+  return (
+    <div style={{ padding: "0 0 24px" }}>
+      {data.headline && <div className="headline-band fade-up">{data.headline}</div>}
+      {data.scores && (
+        <div className="score-cards-row fade-up">
+          {Object.entries(data.scores).map(([name, score]: any) => (
+            <div key={name} className="score-card">
+              <div className="score-card-name">{name}</div>
+              <div className="score-card-value" style={{ color: scoreColor(score) }}>{score}</div>
+              <div className="score-card-bar"><div className="score-card-bar-fill" style={{ width: `${Math.min(100, Math.max(0, score))}%` }} /></div>
+            </div>
+          ))}
+        </div>
+      )}
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 24, marginTop: 24 }}>
+        <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ overflow: "visible" }}>
+          {rings.map(ring => {
+            const r = (ring / 100) * radius;
+            const points = Array.from({ length: numDims }, (_, i) => {
+              const angle = (Math.PI * 2 * i) / numDims - Math.PI / 2;
+              return `${center + r * Math.cos(angle)},${center + r * Math.sin(angle)}`;
+            }).join(" ");
+            return <g key={ring}><polygon points={points} fill="none" stroke="var(--border)" strokeWidth="1" /><text x={center + 4} y={center - r + 4} fill="var(--text-dim)" fontSize="8" fontFamily="var(--font-m)">{ring}</text></g>;
+          })}
+          {dimensions.map((_, i) => {
+            const angle = (Math.PI * 2 * i) / numDims - Math.PI / 2;
+            return <line key={i} x1={center} y1={center} x2={center + radius * Math.cos(angle)} y2={center + radius * Math.sin(angle)} stroke="var(--border)" strokeWidth="1" />;
+          })}
+          {data.comps.map((comp: string, ci: number) => {
+            const pts = getPoints(competitorScores[comp]);
+            const pointsStr = pts.map((p: number[]) => p.join(",")).join(" ");
+            const color = colors[ci % colors.length];
+            const isYou = myProduct && comp.toLowerCase().trim() === myProduct.toLowerCase().trim();
+            return (
+              <g key={comp}>
+                <polygon points={pointsStr} fill={color} fillOpacity={isYou ? 0.25 : 0.1} stroke={color} strokeWidth={isYou ? 2.5 : 1.5} strokeLinejoin="round" />
+                {pts.map((p: number[], di: number) => <circle key={di} cx={p[0]} cy={p[1]} r="3" fill={color} />)}
+              </g>
+            );
+          })}
+          {dimensions.map((dim, i) => {
+            const angle = (Math.PI * 2 * i) / numDims - Math.PI / 2;
+            const lr = radius + 26;
+            const x = center + lr * Math.cos(angle);
+            const y = center + lr * Math.sin(angle);
+            const anchor = Math.cos(angle) > 0.1 ? "start" : Math.cos(angle) < -0.1 ? "end" : "middle";
+            return <text key={dim} x={x} y={y} fill="var(--text-muted)" fontSize="9" fontFamily="var(--font-m)" textAnchor={anchor} dominantBaseline="middle">{dim}</text>;
+          })}
+        </svg>
+        <div style={{ display: "flex", gap: 20, flexWrap: "wrap", justifyContent: "center" }}>
+          {data.comps.map((comp: string, ci: number) => {
+            const color = colors[ci % colors.length];
+            const isYou = myProduct && comp.toLowerCase().trim() === myProduct.toLowerCase().trim();
+            return (
+              <div key={comp} style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                <div style={{ width: 12, height: 12, borderRadius: 3, background: color, opacity: 0.8 }} />
+                <span style={{ fontSize: 12, color: "var(--text-muted)", fontFamily: "var(--font-m)" }}>{comp}{isYou ? " (You)" : ""}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      {data.opp && <div className="opp-band" style={{ marginTop: 24 }}><span className="opp-label">Gap</span><span className="opp-text">{data.opp}</span></div>}
+    </div>
+  );
+}
+
 function HeatmapView({ data, myProduct }: { data: any; myProduct?: string }) {
   const hasC = data.comps && data.comps.length > 0;
   const cols = hasC ? data.comps : ["Industry"];
@@ -1240,7 +1330,7 @@ export default function UXRival() {
   const [errorMsg, setErrorMsg] = useState("");
   const [copied, setCopied] = useState(false);
   const [shared, setShared] = useState(false);
-  const [reportViewMode, setReportViewMode] = useState<"table" | "heatmap">("table");
+  const [reportViewMode, setReportViewMode] = useState<"table" | "heatmap" | "radar">("table");
   const [analysisMode, setAnalysisMode] = useState<"competitor" | "myProduct">("competitor");
   const [myProduct, setMyProduct] = useState("");
   const [showWatchForm, setShowWatchForm] = useState(false);
@@ -1903,8 +1993,9 @@ export default function UXRival() {
                 <div className="view-toggle">
                   <button type="button" className={`view-toggle-btn${reportViewMode === "table" ? " active" : ""}`} onClick={() => setReportViewMode("table")}>Table View</button>
                   <button type="button" className={`view-toggle-btn${reportViewMode === "heatmap" ? " active" : ""}`} onClick={() => setReportViewMode("heatmap")}>Heatmap View</button>
+                  <button type="button" className={`view-toggle-btn${reportViewMode === "radar" ? " active" : ""}`} onClick={() => setReportViewMode("radar")}>Radar Chart</button>
                 </div>
-                {reportViewMode === "table" ? <ReportTable data={reportData} myProduct={analysisMode === "myProduct" ? myProduct : undefined} /> : <HeatmapView data={reportData} myProduct={analysisMode === "myProduct" ? myProduct : undefined} />}
+                {reportViewMode === "radar" ? <RadarChart data={reportData} myProduct={analysisMode === "myProduct" ? myProduct : undefined} /> : reportViewMode === "table" ? <ReportTable data={reportData} myProduct={analysisMode === "myProduct" ? myProduct : undefined} /> : <HeatmapView data={reportData} myProduct={analysisMode === "myProduct" ? myProduct : undefined} />}
                 <div className="form-hint" style={{ marginTop: 32, textAlign: "center" }}>Generated by UXRival.com — Free AI UX Analysis</div>
               </div>
               {showWatchForm && (
