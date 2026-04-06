@@ -83,6 +83,70 @@ const RATING_META: Record<string, { color: string; bg: string; border: string }>
   Weak:      { color: "#f87171", bg: "rgba(248,113,113,0.08)", border: "rgba(248,113,113,0.25)" },
 };
 
+
+function buildPMPrompt(category: string, competitorList: string, myProduct?: string) {
+  const otherComps = competitorList.split(/[\n,]+/).map((s) => s.trim()).filter(Boolean);
+  const comps = myProduct?.trim()
+    ? [myProduct.trim(), ...otherComps.slice(0, 2)]
+    : otherComps.slice(0, 3);
+
+  return `Output ONLY valid JSON. No markdown, no explanation, no extra text.
+
+You are a senior product strategist. Analyze the "${category}" space and compare: ${comps.join(", ")}.
+
+Provide a comprehensive PM intelligence brief covering:
+1. Market positioning and differentiation
+2. Core value proposition per product
+3. Feature differentiation and gaps
+4. UX and onboarding quality signals
+5. Growth and monetisation approach
+6. Strategic opportunities not yet captured by any player
+
+Schema:
+{
+  "headline": "single punchy sentence max 20 words summarizing the biggest market opportunity",
+  "marketOverview": "2-3 sentence market context",
+  "competitors": [
+    {
+      "name": "competitor name",
+      "positioning": "their core positioning in 8 words",
+      "targetUser": "primary user segment in 5 words",
+      "coreStrength": "biggest product strength in 8 words",
+      "coreWeakness": "biggest product weakness in 8 words",
+      "monetisation": "how they make money in 6 words",
+      "uxScore": 0-100,
+      "growthSignal": "one growth observation in 8 words"
+    }
+  ],
+  "featureMatrix": [
+    {
+      "feature": "feature or capability name",
+      "scores": {"CompetitorName": "Yes|Partial|No"}
+    }
+  ],
+  "gaps": [
+    {
+      "opportunity": "specific unmet need in 10 words",
+      "urgency": "High|Medium|Low",
+      "rationale": "why this matters in 10 words"
+    }
+  ],
+  "strategicRecommendations": [
+    {
+      "rec": "specific recommendation in 12 words",
+      "impact": "High|Medium|Low",
+      "effort": "High|Medium|Low"
+    }
+  ],
+  "suggestions": [
+    {"name": "competitor name", "reason": "why relevant in 8 words", "region": "Global|Africa|US|Europe"}
+  ],
+  "opp": "the single biggest market gap in 15 words"
+}
+
+JSON only:`;
+}
+
 function buildPrompt(category: string, competitorList: string, depth: string, focusAreas?: string, myProduct?: string) {
   const otherComps = competitorList.split(/[\n,]+/).map((s) => s.trim()).filter(Boolean);
   const comps = myProduct?.trim()
@@ -850,6 +914,114 @@ const RATING_COLORS: Record<string, string> = {
 };
 
 
+
+function PMReport({ data }: { data: any }) {
+  if (!data.competitors) return null;
+  const urgencyColor = (u: string) => u === "High" ? "#f87171" : u === "Medium" ? "#facc15" : "#4ade80";
+  const impactColor = (i: string) => i === "High" ? "#4ade80" : i === "Medium" ? "#facc15" : "#f87171";
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+      {data.headline && <div className="headline-band fade-up">{data.headline}</div>}
+      {data.marketOverview && <div className="summary-strip fade-up"><strong>Market Overview — </strong>{data.marketOverview}</div>}
+
+      {/* Competitor cards */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        <div style={{ fontFamily: "var(--font-m)", fontSize: 10, color: "var(--accent)", textTransform: "uppercase", letterSpacing: "0.1em" }}>Competitor Profiles</div>
+        {data.competitors?.map((comp: any, i: number) => (
+          <div key={i} style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: "var(--radius)", padding: 20 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 8, marginBottom: 14 }}>
+              <div style={{ fontSize: 16, fontWeight: 800, color: "var(--text)" }}>{comp.name}</div>
+              {comp.uxScore && <div style={{ fontFamily: "var(--font-m)", fontSize: 11, color: comp.uxScore >= 80 ? "#4ade80" : comp.uxScore >= 60 ? "#facc15" : "#f87171", background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 8, padding: "4px 10px" }}>UX {comp.uxScore}/100</div>}
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+              {[
+                { label: "Positioning", value: comp.positioning },
+                { label: "Target User", value: comp.targetUser },
+                { label: "Core Strength", value: comp.coreStrength, color: "#4ade80" },
+                { label: "Core Weakness", value: comp.coreWeakness, color: "#f87171" },
+                { label: "Monetisation", value: comp.monetisation },
+                { label: "Growth Signal", value: comp.growthSignal },
+              ].map(item => item.value && (
+                <div key={item.label} style={{ background: "var(--surface2)", borderRadius: 8, padding: "10px 12px" }}>
+                  <div style={{ fontFamily: "var(--font-m)", fontSize: 9, color: "var(--text-dim)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>{item.label}</div>
+                  <div style={{ fontSize: 12, color: item.color || "var(--text)", lineHeight: 1.5 }}>{item.value}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Feature matrix */}
+      {data.featureMatrix && data.featureMatrix.length > 0 && (
+        <div>
+          <div style={{ fontFamily: "var(--font-m)", fontSize: 10, color: "var(--accent)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 12 }}>Feature Matrix</div>
+          <div style={{ border: "1px solid var(--border)", borderRadius: "var(--radius)", overflow: "hidden" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead>
+                <tr style={{ background: "var(--surface2)" }}>
+                  <th style={{ padding: "10px 14px", textAlign: "left", fontFamily: "var(--font-m)", fontSize: 10, color: "var(--text-muted)", textTransform: "uppercase" }}>Feature</th>
+                  {data.competitors?.map((comp: any) => <th key={comp.name} style={{ padding: "10px 14px", textAlign: "center", fontFamily: "var(--font-m)", fontSize: 10, color: "var(--accent)", textTransform: "uppercase" }}>{comp.name}</th>)}
+                </tr>
+              </thead>
+              <tbody>
+                {data.featureMatrix.map((row: any, i: number) => (
+                  <tr key={i} style={{ borderTop: "1px solid var(--border)", background: i % 2 === 0 ? "var(--surface)" : "var(--surface2)" }}>
+                    <td style={{ padding: "10px 14px", fontSize: 13, color: "var(--text)" }}>{row.feature}</td>
+                    {data.competitors?.map((comp: any) => {
+                      const val = row.scores?.[comp.name];
+                      const color = val === "Yes" ? "#4ade80" : val === "Partial" ? "#facc15" : "#f87171";
+                      return <td key={comp.name} style={{ padding: "10px 14px", textAlign: "center", fontSize: 12, color, fontWeight: 600 }}>{val === "Yes" ? "✓" : val === "Partial" ? "◐" : "✕"}</td>;
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
+
+      {/* Gaps */}
+      {data.gaps && data.gaps.length > 0 && (
+        <div>
+          <div style={{ fontFamily: "var(--font-m)", fontSize: 10, color: "var(--accent)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 12 }}>Market Gaps & Opportunities</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {data.gaps.map((gap: any, i: number) => (
+              <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 12, padding: "12px 16px", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10 }}>
+                <div style={{ background: urgencyColor(gap.urgency), borderRadius: 4, padding: "2px 8px", fontFamily: "var(--font-m)", fontSize: 9, fontWeight: 700, color: "#0a0a0a", whiteSpace: "nowrap", marginTop: 2 }}>{gap.urgency}</div>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: "var(--text)", marginBottom: 2 }}>{gap.opportunity}</div>
+                  <div style={{ fontSize: 11, color: "var(--text-muted)" }}>{gap.rationale}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Strategic recommendations */}
+      {data.strategicRecommendations && data.strategicRecommendations.length > 0 && (
+        <div>
+          <div style={{ fontFamily: "var(--font-m)", fontSize: 10, color: "var(--accent)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 12 }}>Strategic Recommendations</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+            {data.strategicRecommendations.map((rec: any, i: number) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 16px", background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10, flexWrap: "wrap" }}>
+                <div style={{ flex: 1, fontSize: 13, color: "var(--text)" }}>{rec.rec}</div>
+                <div style={{ display: "flex", gap: 6 }}>
+                  <span style={{ fontFamily: "var(--font-m)", fontSize: 9, background: impactColor(rec.impact), color: "#0a0a0a", padding: "2px 8px", borderRadius: 4, fontWeight: 700 }}>Impact: {rec.impact}</span>
+                  <span style={{ fontFamily: "var(--font-m)", fontSize: 9, background: "var(--surface2)", color: "var(--text-muted)", padding: "2px 8px", borderRadius: 4, border: "1px solid var(--border)" }}>Effort: {rec.effort}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {data.opp && <div className="opp-band" style={{ marginTop: 8 }}><span className="opp-label">Gap</span><span className="opp-text">{data.opp}</span></div>}
+    </div>
+  );
+}
+
 function RadarChart({ data, myProduct }: { data: any; myProduct?: string }) {
   const hasC = data.comps && data.comps.length > 0;
   if (!hasC || !data.secs) return null;
@@ -1331,7 +1503,7 @@ export default function UXRival() {
   const [copied, setCopied] = useState(false);
   const [shared, setShared] = useState(false);
   const [reportViewMode, setReportViewMode] = useState<"table" | "heatmap" | "radar">("table");
-  const [analysisMode, setAnalysisMode] = useState<"competitor" | "myProduct">("competitor");
+  const [analysisMode, setAnalysisMode] = useState<"competitor" | "myProduct" | "pmIntelligence">("competitor");
   const [myProduct, setMyProduct] = useState("");
   const [showWatchForm, setShowWatchForm] = useState(false);
   const [watchEmail, setWatchEmail] = useState("");
@@ -1565,7 +1737,7 @@ export default function UXRival() {
       const res = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt: buildPrompt(effectiveCategory, competitors, depth, focusAreas, analysisMode === "myProduct" ? myProduct : undefined) }),
+        body: JSON.stringify({ prompt: analysisMode === "pmIntelligence" ? buildPMPrompt(effectiveCategory, competitors, myProduct) : buildPrompt(effectiveCategory, competitors, depth, focusAreas, analysisMode === "myProduct" ? myProduct : undefined) }),
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const { text: raw } = await res.json();
@@ -1904,6 +2076,7 @@ export default function UXRival() {
                   <div className="view-toggle" style={{ marginBottom: 0 }}>
                     <button type="button" className={`view-toggle-btn${analysisMode === "competitor" ? " active" : ""}`} onClick={() => setAnalysisMode("competitor")}>Competitor Analysis</button>
                     <button type="button" className={`view-toggle-btn${analysisMode === "myProduct" ? " active" : ""}`} onClick={() => setAnalysisMode("myProduct")}>My Product vs Market</button>
+                    <button type="button" className={`view-toggle-btn${analysisMode === "pmIntelligence" ? " active" : ""}`} onClick={() => setAnalysisMode("pmIntelligence")}>PM Intelligence</button>
                   </div>
                 </div>
                 {analysisMode === "myProduct" && (
@@ -1995,7 +2168,7 @@ export default function UXRival() {
                   <button type="button" className={`view-toggle-btn${reportViewMode === "heatmap" ? " active" : ""}`} onClick={() => setReportViewMode("heatmap")}>Heatmap View</button>
                   <button type="button" className={`view-toggle-btn${reportViewMode === "radar" ? " active" : ""}`} onClick={() => setReportViewMode("radar")}>Radar Chart</button>
                 </div>
-                {reportViewMode === "radar" ? <RadarChart data={reportData} myProduct={analysisMode === "myProduct" ? myProduct : undefined} /> : reportViewMode === "table" ? <ReportTable data={reportData} myProduct={analysisMode === "myProduct" ? myProduct : undefined} /> : <HeatmapView data={reportData} myProduct={analysisMode === "myProduct" ? myProduct : undefined} />}
+                {analysisMode === "pmIntelligence" ? <PMReport data={reportData} /> : reportViewMode === "radar" ? <RadarChart data={reportData} myProduct={analysisMode === "myProduct" ? myProduct : undefined} /> : reportViewMode === "table" ? <ReportTable data={reportData} myProduct={analysisMode === "myProduct" ? myProduct : undefined} /> : <HeatmapView data={reportData} myProduct={analysisMode === "myProduct" ? myProduct : undefined} />}
                 <div className="form-hint" style={{ marginTop: 32, textAlign: "center" }}>Generated by UXRival.com — Free AI UX Analysis</div>
               </div>
               {showWatchForm && (
