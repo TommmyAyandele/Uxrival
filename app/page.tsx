@@ -436,7 +436,7 @@ const styles = `
   .modal-scroll { overflow: auto; padding: 24px; flex: 1; min-height: 0; }
   .modal-actions { display: flex; gap: 8px; padding: 20px 24px 24px; flex-shrink: 0; border-top: 1px solid var(--border); background: var(--surface2); }
   .hero-section { padding: 52px 0 56px; }
-  .hero-split { display: block; }
+  .hero-split { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: start; }
   .hero-left { padding-top: 8px; }
   .hero-kicker { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-m); font-size: 11px; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; background: var(--accent-dim); border: 1px solid rgba(232,255,71,0.15); padding: 5px 12px; border-radius: 20px; margin-bottom: 24px; }
   .hero-kicker::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); display: inline-block; }
@@ -446,7 +446,7 @@ const styles = `
   .hero-trust { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .trust-item { font-family: var(--font-m); font-size: 11px; color: var(--text-dim); }
   .trust-sep { color: var(--text-dim); font-size: 11px; }
-  .hero-right { position: static; }
+  .hero-right { position: sticky; top: 80px; }
   .form-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px; }
   .form-row { margin-bottom: 24px; }
   .field-label { display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; font-family: var(--font-m); }
@@ -2208,8 +2208,8 @@ export default function UXRival() {
         <div id="learn">
           <section className="section">
             <div className="section-eyebrow">What you get</div>
-            <div className="section-title">Everything you need to outmaneuver competition</div>
-            <p className="section-sub">Stop doing competitor research manually. UX Rival generates structured intelligence in seconds — for designers, PMs and founders.</p>
+            <div className="section-title">Everything a designer needs to win</div>
+            <p className="section-sub">Stop spending hours on manual competitor audits. UX Rival does it in seconds.</p>
             <div className="features-grid">
               {[
                 { icon: "⚡", title: "Instant Teardowns", desc: "Structured UX breakdown of any product category in under 30 seconds." },
@@ -2242,7 +2242,7 @@ export default function UXRival() {
           </section>
           <section className="section">
             <div className="section-eyebrow">Who it&apos;s for</div>
-            <div className="section-title">Built for every role on the product team</div>
+            <div className="section-title">Built for people who ship products</div>
             <div className="audience-grid">
               {[
                 { accent: "Product Designers", desc: "Stop spending hours on manual audits. Get structured insights in seconds." },
