@@ -435,17 +435,18 @@ const styles = `
   .modal-close:hover { color: var(--text); border-color: var(--accent); }
   .modal-scroll { overflow: auto; padding: 24px; flex: 1; min-height: 0; }
   .modal-actions { display: flex; gap: 8px; padding: 20px 24px 24px; flex-shrink: 0; border-top: 1px solid var(--border); background: var(--surface2); }
-  .hero-section { padding: 72px 0 56px; }
-  .hero-center { text-align: center; max-width: 700px; margin: 0 auto 52px; }
-  .hero-kicker { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-m); font-size: 11px; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; background: var(--accent-dim); border: 1px solid rgba(232,255,71,0.15); padding: 5px 14px; border-radius: 20px; margin-bottom: 28px; }
+  .hero-section { padding: 52px 0 56px; }
+  .hero-split { display: block; }
+  .hero-left { padding-top: 8px; }
+  .hero-kicker { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-m); font-size: 11px; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; background: var(--accent-dim); border: 1px solid rgba(232,255,71,0.15); padding: 5px 12px; border-radius: 20px; margin-bottom: 24px; }
   .hero-kicker::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); display: inline-block; }
-  .hero-h1 { font-size: clamp(38px, 5.5vw, 68px); font-weight: 800; letter-spacing: -0.05em; line-height: 1.02; margin-bottom: 20px; }
+  .hero-h1 { font-size: clamp(32px, 4.5vw, 52px); font-weight: 800; letter-spacing: -0.05em; line-height: 1.05; margin-bottom: 18px; }
   .hero-h1 em { font-style: normal; color: var(--accent); }
-  .hero-sub { font-size: 17px; color: var(--text-muted); line-height: 1.65; margin-bottom: 28px; max-width: 520px; margin-left: auto; margin-right: auto; }
-  .hero-trust { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; }
+  .hero-sub { font-size: 16px; color: var(--text-muted); line-height: 1.65; margin-bottom: 24px; }
+  .hero-trust { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
   .trust-item { font-family: var(--font-m); font-size: 11px; color: var(--text-dim); }
   .trust-sep { color: var(--text-dim); font-size: 11px; }
-  .hero-form-wrap { max-width: 700px; margin: 0 auto; }
+  .hero-right { position: static; }
   .form-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px; }
   .form-row { margin-bottom: 24px; }
   .field-label { display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; font-family: var(--font-m); }
@@ -2207,8 +2208,8 @@ export default function UXRival() {
         <div id="learn">
           <section className="section">
             <div className="section-eyebrow">What you get</div>
-            <div className="section-title">One tool. Every role.</div>
-            <p className="section-sub">Not just UX scores. PM briefs, radar charts, heatmaps, feature matrices and weekly monitoring — all in one tool.</p>
+            <div className="section-title">Everything you need to outmaneuver competition</div>
+            <p className="section-sub">Stop doing competitor research manually. UX Rival generates structured intelligence in seconds — for designers, PMs and founders.</p>
             <div className="features-grid">
               {[
                 { icon: "⚡", title: "Instant Teardowns", desc: "Structured UX breakdown of any product category in under 30 seconds." },
