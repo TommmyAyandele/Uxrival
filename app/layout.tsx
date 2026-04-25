@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Suspense } from "react";
 import { structuredData } from "./structured-data";
 
@@ -50,6 +51,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
+        <Script src="https://js.paystack.co/v1/inline.js" strategy="beforeInteractive" />
         <Suspense fallback={null}>
           {children}
         </Suspense>

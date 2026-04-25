@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { width: 340px; background: #090909; color: #f0f0f0; font-family: Arial, sans-serif; }
+    .header { background: #0f0f12; border-bottom: 1px solid #212126; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; }
+    .logo { font-size: 16px; font-weight: 800; letter-spacing: -0.03em; }
+    .logo span { color: #e8ff47; }
+    .pill { font-size: 9px; font-weight: 600; background: rgba(232,255,71,0.07); color: #e8ff47; border: 1px solid rgba(232,255,71,0.2); padding: 2px 8px; border-radius: 20px; letter-spacing: 0.1em; text-transform: uppercase; }
+    .body { padding: 20px; }
+    .site-detected { background: #17171a; border: 1px solid #212126; border-radius: 10px; padding: 12px 14px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+    .site-name { font-size: 13px; font-weight: 700; margin-bottom: 2px; }
+    .site-url { font-size: 10px; color: #6a6a80; font-family: monospace; }
+    label { display: block; font-size: 10px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: #66666f; margin-bottom: 8px; font-family: monospace; }
+    select, input, textarea { width: 100%; background: #17171a; border: 1px solid #212126; border-radius: 8px; color: #f0f0f0; font-size: 13px; padding: 10px 12px; outline: none; margin-bottom: 14px; font-family: Arial, sans-serif; }
+    textarea { resize: none; height: 72px; line-height: 1.5; }
+    .depth-row { display: flex; gap: 8px; margin-bottom: 14px; }
+    .depth-btn { flex: 1; background: #17171a; border: 1px solid #212126; border-radius: 8px; color: #66666f; font-size: 11px; font-weight: 600; padding: 8px; cursor: pointer; text-align: center; transition: all 0.15s; }
+    .depth-btn.active { background: rgba(232,255,71,0.07); border-color: #e8ff47; color: #e8ff47; }
+    .btn { width: 100%; background: #e8ff47; color: #090909; border: none; border-radius: 8px; padding: 12px; font-size: 14px; font-weight: 700; cursor: pointer; margin-bottom: 10px; }
+    .btn-open { width: 100%; background: transparent; color: #66666f; border: 1px solid #212126; border-radius: 8px; padding: 10px; font-size: 12px; cursor: pointer; }
+    .loading { display: none; text-align: center; padding: 40px 20px; }
+    .spinner { width: 32px; height: 32px; border: 2px solid #212126; border-top-color: #e8ff47; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { font-size: 12px; color: #66666f; font-family: monospace; }
+    .result { display: none; }
+    .result-header { background: #0f0f12; border-bottom: 1px solid #212126; padding: 12px 20px; display: flex; align-items: center; justify-content: space-between; }
+    .result-label { font-size: 9px; color: #e8ff47; font-family: monospace; letter-spacing: 0.1em; text-transform: uppercase; }
+    .result-title { font-size: 15px; font-weight: 700; }
+    .back-btn { background: #17171a; border: 1px solid #212126; border-radius: 6px; color: #66666f; font-size: 11px; padding: 4px 10px; cursor: pointer; }
+    .result-body { padding: 16px 20px; max-height: 380px; overflow-y: auto; }
+    .score-row { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+    .score-card { flex: 1; min-width: 80px; background: #17171a; border: 1px solid #212126; border-radius: 8px; padding: 10px 12px; text-align: center; }
+    .score-name { font-size: 9px; color: #66666f; font-family: monospace; text-transform: uppercase; margin-bottom: 4px; }
+    .score-val { font-size: 24px; font-weight: 800; }
+    .headline { font-size: 13px; font-weight: 700; border-left: 2px solid #e8ff47; padding: 8px 12px; background: rgba(232,255,71,0.04); border-radius: 0 6px 6px 0; margin-bottom: 12px; line-height: 1.4; }
+    .opp { background: rgba(232,255,71,0.04); border: 1px solid rgba(232,255,71,0.1); border-radius: 8px; padding: 10px 12px; margin-top: 10px; }
+    .opp-label { font-size: 9px; color: #e8ff47; font-family: monospace; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 4px; }
+    .opp-text { font-size: 12px; color: #c8d87a; line-height: 1.5; }
+    .result-footer { padding: 12px 20px; border-top: 1px solid #212126; display: flex; gap: 8px; }
+    .btn-sm { flex: 1; background: #17171a; border: 1px solid #212126; border-radius: 6px; color: #f0f0f0; font-size: 11px; font-weight: 600; padding: 8px; cursor: pointer; text-align: center; }
+    .btn-sm.accent { background: #e8ff47; color: #090909; border-color: #e8ff47; }
+    .error { background: rgba(255,71,87,0.05); border: 1px solid rgba(255,71,87,0.2); border-radius: 8px; padding: 12px; font-size: 12px; color: #ff6b7a; margin-top: 10px; display: none; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">UX<span>Rival</span></div>
+    <span class="pill">BETA</span>
+  </div>
+  <div id="formView">
+    <div class="body">
+      <div class="site-detected">
+        <div style="font-size:18px">🌐</div>
+        <div style="flex:1">
+          <div class="site-name" id="siteName">Detecting site...</div>
+          <div class="site-url" id="siteUrl"></div>
+        </div>
+      </div>
+      <label>Industry or Category</label>
+      <select id="industry">
+        <option value="">Select an industry...</option>
+        <option value="fintech">Fintech</option>
+        <option value="e-commerce marketplace">E-Commerce</option>
+        <option value="project management tool">Project Management</option>
+        <option value="design tool for teams">Design Tools</option>
+        <option value="social media platform">Social Media</option>
+        <option value="video conferencing tool">Video Conferencing</option>
+        <option value="food delivery platform">Food Delivery</option>
+        <option value="ride-sharing app">Ride Sharing</option>
+        <option value="mental health &amp; wellness app">Mental Health</option>
+        <option value="crypto exchange platform">Crypto Exchange</option>
+        <option value="learning management system">EdTech / LMS</option>
+        <option value="CRM software">CRM</option>
+        <option value="HR management platform">HR Platform</option>
+        <option value="developer tools &amp; IDE">Developer Tools</option>
+        <option value="custom">Custom — type below</option>
+      </select>
+      <div id="customWrap" style="display:none">
+        <label>Custom Category</label>
+        <input type="text" id="customCategory" placeholder="e.g. AI writing tools" />
+      </div>
+      <label>Competitors (optional, one per line)</label>
+      <textarea id="competitors" placeholder="Leave empty to analyze current site only"></textarea>
+      <label>Depth</label>
+      <div class="depth-row">
+        <button type="button" class="depth-btn active" id="quickBtn">Quick Scan</button>
+        <button type="button" class="depth-btn" id="deepBtn">Deep Teardown</button>
+      </div>
+      <button type="button" class="btn" id="analyzeBtn">Analyze →</button>
+      <button type="button" class="btn-open" id="openFullBtn">Open full tool →</button>
+      <div class="error" id="errorMsg"></div>
+    </div>
+  </div>
+  <div class="loading" id="loadingView">
+    <div class="spinner"></div>
+    <div class="loading-text" id="loadingText">Analyzing UX patterns...</div>
+  </div>
+  <div class="result" id="resultView">
+    <div class="result-header">
+      <div>
+        <div class="result-label">// analysis complete</div>
+        <div class="result-title" id="resultTitle"></div>
+      </div>
+      <button type="button" class="back-btn" id="backBtn">Back</button>
+    </div>
+    <div class="result-body" id="resultContent"></div>
+    <div class="result-footer">
+      <button type="button" class="btn-sm" id="copyBtn">Copy JSON</button>
+      <button type="button" class="btn-sm accent" id="openFullBtn2">Open Full Report</button>
+    </div>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

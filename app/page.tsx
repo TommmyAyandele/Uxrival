@@ -4,6 +4,9 @@ import { useSearchParams } from "next/navigation";
 
 const EMAIL_STORAGE_KEY = "uxrival_email_v2";
 const SURVEY_STORAGE_KEY = "uxrival_survey_done_v2";
+const USAGE_STORAGE_KEY = "uxrival_usage_count_v2";
+const PRO_STORAGE_KEY = "uxrival_pro_v2";
+const FREE_LIMIT = 3;
 const WATCHLIST_STORAGE_KEY = "uxrival_watchlist_v2";
 const TOUR_STORAGE_KEY = "uxrival_toured";
 const HISTORY_STORAGE_KEY = "uxrival_history_v2";
@@ -1496,6 +1499,9 @@ export default function UXRival() {
   const [pendingReportData, setPendingReportData] = useState<any>(null);
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [showSurvey, setShowSurvey] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
+  const [isPro, setIsPro] = useState(false);
+  const [usageCount, setUsageCount] = useState(0);
   const [surveyStep, setSurveyStep] = useState(0);
   const [surveyAnswers, setSurveyAnswers] = useState<{role?: string; source?: string; suggestion?: string}>({});
   const [emailInput, setEmailInput] = useState("");
@@ -1548,6 +1554,10 @@ export default function UXRival() {
   useEffect(() => {
     setWatchlist(loadWatchlist());
     setHistory(loadHistory());
+    const count = parseInt(localStorage.getItem(USAGE_STORAGE_KEY) || '0');
+    setUsageCount(count);
+    const pro = localStorage.getItem(PRO_STORAGE_KEY) === 'true';
+    setIsPro(pro);
   }, []);
 
   useEffect(() => {
@@ -1732,6 +1742,15 @@ export default function UXRival() {
 
   const handleGenerate = async () => {
     if (!effectiveCategory.trim()) return;
+    
+    // Check usage limit
+    const count = parseInt(localStorage.getItem(USAGE_STORAGE_KEY) || '0');
+    const pro = localStorage.getItem(PRO_STORAGE_KEY) === 'true';
+    if (!pro && count >= FREE_LIMIT) {
+      setShowPaywall(true);
+      return;
+    }
+    
     setLoading(true); setErrorMsg(""); setReportData(null);
     try {
       const res = await fetch("/api/analyze", {
@@ -1744,6 +1763,13 @@ export default function UXRival() {
       const start = raw.indexOf("{"); const end = raw.lastIndexOf("}");
       if (start === -1 || end === -1) throw new Error(`No JSON found.`);
       const data = JSON.parse(raw.slice(start, end + 1));
+      
+      // Increment usage count
+      const newCount = parseInt(localStorage.getItem(USAGE_STORAGE_KEY) || '0') + 1;
+      localStorage.setItem(USAGE_STORAGE_KEY, newCount.toString());
+      setUsageCount(newCount);
+      
+      // Increment usage count
       
       // Save to history
       saveToHistory(data);
@@ -2007,7 +2033,15 @@ export default function UXRival() {
               </div>
             </div>
             
-            <button type="button" className="btn-primary" onClick={scrollToForm}>Get Started Free →</button>
+            {!isPro && (
+              <div style={{ fontFamily: "var(--font-m)", fontSize: 11, color: "var(--text-dim)", display: "flex", alignItems: "center", gap: 4 }}>
+                <span style={{ color: usageCount >= FREE_LIMIT ? "var(--red)" : "var(--accent)", fontWeight: 700 }}>{Math.max(0, FREE_LIMIT - usageCount)}</span>
+                <span>free left</span>
+              </div>
+            )}
+            <button type="button" className="btn-primary" onClick={isPro ? scrollToForm : (usageCount >= FREE_LIMIT ? () => setShowPaywall(true) : scrollToForm)}>
+              {isPro ? "Run Analysis →" : usageCount >= FREE_LIMIT ? "Upgrade to Pro →" : "Get Started Free →"}
+            </button>
             
             {/* Mobile hamburger button */}
             <button 
