@@ -51,7 +51,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body>
-        <Script src="https://js.paystack.co/v1/inline.js" strategy="beforeInteractive" />
+        <Script src="https://checkout.flutterwave.com/v3.js" strategy="beforeInteractive" />
         <Suspense fallback={null}>
           {children}
         </Suspense>

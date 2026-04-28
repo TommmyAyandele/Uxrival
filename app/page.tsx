@@ -1500,6 +1500,7 @@ export default function UXRival() {
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [showSurvey, setShowSurvey] = useState(false);
   const [showPaywall, setShowPaywall] = useState(false);
+  const [payCurrency, setPayCurrency] = useState<'NGN' | 'USD'>('NGN');
   const [isPro, setIsPro] = useState(false);
   const [usageCount, setUsageCount] = useState(0);
   const [surveyStep, setSurveyStep] = useState(0);
