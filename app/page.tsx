@@ -2,14 +2,14 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 
-const EMAIL_STORAGE_KEY = "uxrival_email_v2";
-const SURVEY_STORAGE_KEY = "uxrival_survey_done_v2";
-const USAGE_STORAGE_KEY = "uxrival_usage_count_v2";
-const PRO_STORAGE_KEY = "uxrival_pro_v2";
+const EMAIL_STORAGE_KEY = "uxrival_email_v3";
+const SURVEY_STORAGE_KEY = "uxrival_survey_done_v3";
+const USAGE_STORAGE_KEY = "uxrival_usage_count_v3";
+const PRO_STORAGE_KEY = "uxrival_pro_v3";
 const FREE_LIMIT = 3;
-const WATCHLIST_STORAGE_KEY = "uxrival_watchlist_v2";
+const WATCHLIST_STORAGE_KEY = "uxrival_watchlist_v3";
 const TOUR_STORAGE_KEY = "uxrival_toured";
-const HISTORY_STORAGE_KEY = "uxrival_history_v2";
+const HISTORY_STORAGE_KEY = "uxrival_history_v3";
 
 type WatchlistItem = { id: string; category: string; competitors: string; depth: string; email: string; frequency: string; savedAt: string; reportData: any | null };
 type HistoryItem = { id: string; category: string; competitors: string; depth: string; reportData: any; createdAt: string };
