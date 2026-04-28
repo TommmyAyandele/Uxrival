@@ -2478,6 +2478,59 @@ const data = await res.json();`}</pre>
           )}
         </div>
       )}
+      {showPaywall && (
+        <div className="modal-overlay" onClick={() => setShowPaywall(false)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: 480 }}>
+            <button type="button" className="modal-close" onClick={() => setShowPaywall(false)}>×</button>
+            <div style={{ padding: "40px 36px", textAlign: "center" }}>
+              <div style={{ fontFamily: "var(--font-m)", fontSize: 10, color: "var(--accent)", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 16 }}>You have used your 3 free analyses</div>
+              <h2 style={{ fontSize: 24, fontWeight: 800, letterSpacing: "-0.03em", marginBottom: 12 }}>Upgrade to UX Rival Pro</h2>
+              <p style={{ fontSize: 14, color: "var(--text-muted)", lineHeight: 1.65, marginBottom: 28 }}>Unlimited analyses, all modes, radar charts, PM Intelligence and weekly monitoring.</p>
+              <div style={{ display: "flex", gap: 12, marginBottom: 28 }}>
+                <div onClick={() => setPayCurrency('NGN')} style={{ flex: 1, background: "var(--surface2)", border: payCurrency === 'NGN' ? "2px solid var(--accent)" : "1px solid var(--border)", borderRadius: 12, padding: "16px", textAlign: "center", cursor: "pointer" }}>
+                  <div style={{ fontFamily: "var(--font-m)", fontSize: 9, color: "var(--text-dim)", marginBottom: 6 }}>NIGERIA</div>
+                  <div style={{ fontSize: 26, fontWeight: 800, color: "var(--accent)", marginBottom: 2 }}>₦5,000</div>
+                  <div style={{ fontSize: 10, color: "var(--text-muted)" }}>per month</div>
+                </div>
+                <div onClick={() => setPayCurrency('USD')} style={{ flex: 1, background: "var(--surface2)", border: payCurrency === 'USD' ? "2px solid var(--accent)" : "1px solid var(--border)", borderRadius: 12, padding: "16px", textAlign: "center", cursor: "pointer" }}>
+                  <div style={{ fontFamily: "var(--font-m)", fontSize: 9, color: "var(--text-dim)", marginBottom: 6 }}>INTERNATIONAL</div>
+                  <div style={{ fontSize: 26, fontWeight: 800, color: "var(--accent)", marginBottom: 2 }}>$5</div>
+                  <div style={{ fontSize: 10, color: "var(--text-muted)" }}>per month</div>
+                </div>
+              </div>
+              <button type="button" className="btn-primary" style={{ width: "100%", padding: "16px", marginBottom: 12 }}
+                onClick={() => {
+                  const email = localStorage.getItem(EMAIL_STORAGE_KEY) || '';
+                  const isUSD = payCurrency === 'USD';
+                  (window as any).FlutterwaveCheckout({
+                    public_key: process.env.NEXT_PUBLIC_FLUTTERWAVE_PUBLIC_KEY,
+                    tx_ref: 'uxrival_pro_' + Date.now(),
+                    amount: isUSD ? 5 : 5000,
+                    currency: isUSD ? 'USD' : 'NGN',
+                    payment_options: 'card,ussd,banktransfer',
+                    customer: { email: email || 'user@uxrival.xyz', name: 'UX Rival User' },
+                    customizations: { title: 'UX Rival Pro', description: 'Unlimited AI competitive UX analyses', logo: 'https://uxrival.xyz/favicon.svg' },
+                    callback: (response: any) => {
+                      if (response.status === 'successful') {
+                        localStorage.setItem(PRO_STORAGE_KEY, 'true');
+                        setIsPro(true);
+                        setShowPaywall(false);
+                        setToastMsg('Welcome to Pro! Unlimited analyses unlocked ✓');
+                        setTimeout(() => setToastMsg(''), 4000);
+                      }
+                    },
+                    onclose: () => {}
+                  });
+                }}
+              >
+                {payCurrency === 'USD' ? 'Upgrade — $5/month' : 'Upgrade — ₦5,000/month'}
+              </button>
+              <p style={{ fontSize: 11, color: "var(--text-dim)" }}>Cancel anytime · Instant access · No hidden fees</p>
+            </div>
+          </div>
+        </div>
+      )}
+      {toastMsg && <div className="toast">{toastMsg}</div>}
             {showTour && tourStep < tourSteps.length && (
         <TourTooltip
           step={tourStep + 1}
