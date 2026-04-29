@@ -438,19 +438,19 @@ const styles = `
   .modal-close:hover { color: var(--text); border-color: var(--accent); }
   .modal-scroll { overflow: auto; padding: 24px; flex: 1; min-height: 0; }
   .modal-actions { display: flex; gap: 8px; padding: 20px 24px 24px; flex-shrink: 0; border-top: 1px solid var(--border); background: var(--surface2); }
-  .hero-section { padding: 52px 0 56px; }
+  .hero-section { padding: 80px 0 0; }
   .hero-split { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: start; }
   .hero-left { padding-top: 8px; }
   .hero-kicker { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-m); font-size: 11px; color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase; background: var(--accent-dim); border: 1px solid rgba(232,255,71,0.15); padding: 5px 12px; border-radius: 20px; margin-bottom: 24px; }
   .hero-kicker::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); display: inline-block; }
-  .hero-h1 { font-size: clamp(32px, 4.5vw, 52px); font-weight: 800; letter-spacing: -0.05em; line-height: 1.05; margin-bottom: 18px; }
+  .hero-h1 { font-size: clamp(36px, 5vw, 62px); font-weight: 700; letter-spacing: -0.04em; line-height: 1.06; margin-bottom: 16px; }
   .hero-h1 em { font-style: normal; color: var(--accent); }
-  .hero-sub { font-size: 16px; color: var(--text-muted); line-height: 1.65; margin-bottom: 24px; }
-  .hero-trust { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .hero-sub { font-size: 16px; color: var(--text-muted); line-height: 1.7; margin-bottom: 0; }
+  .hero-trust { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 20px; }
   .trust-item { font-family: var(--font-m); font-size: 11px; color: var(--text-dim); }
   .trust-sep { color: var(--text-dim); font-size: 11px; }
   .hero-right { position: sticky; top: 80px; }
-  .form-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px; }
+  .form-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 36px; box-shadow: 0 32px 64px rgba(0,0,0,0.4); }
   .form-row { margin-bottom: 24px; }
   .field-label { display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 10px; font-family: var(--font-m); }
   input[type="text"], textarea { width: 100%; background: #1a1a22; border: 1px solid #2a2a3a; border-radius: 10px; color: var(--text); font-family: var(--font-d); font-size: 15px; padding: 13px 16px; transition: border-color 0.15s, box-shadow 0.15s; appearance: none; }
@@ -547,12 +547,13 @@ const styles = `
   .opp-band { border-top: 1px solid rgba(232,255,71,0.1); background: var(--accent-dim); padding: 14px 20px; display: flex; align-items: flex-start; gap: 12px; }
   .opp-label { font-family: var(--font-m); font-size: 9px; color: var(--accent); letter-spacing: 0.12em; text-transform: uppercase; white-space: nowrap; padding-top: 2px; }
   .opp-text { font-size: 13px; color: #c8d87a; line-height: 1.6; }
-  .section { padding: 80px 0; border-top: 1px solid var(--border); }
+  .section { padding: 100px 0; border-top: 1px solid var(--border); }
   .section-eyebrow { font-family: var(--font-m); font-size: 10px; color: var(--accent); letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 14px; }
-  .section-title { font-size: clamp(26px, 4vw, 38px); font-weight: 800; letter-spacing: -0.04em; line-height: 1.1; margin-bottom: 12px; }
+  .section-title { font-size: clamp(28px, 4vw, 42px); font-weight: 700; letter-spacing: -0.04em; line-height: 1.1; margin-bottom: 12px; }
   .section-sub { font-size: 16px; color: var(--text-muted); line-height: 1.65; max-width: 480px; }
   .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-top: 48px; }
-  .feature-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; transition: border-color 0.2s; }
+  .feature-card { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 32px; transition: border-color 0.2s, transform 0.2s; }
+  .feature-card:hover { transform: translateY(-2px); }
   .feature-card:hover { border-color: var(--border-hover); }
   .feature-icon { font-size: 22px; margin-bottom: 16px; }
   .feature-title { font-size: 16px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 8px; }
@@ -565,7 +566,8 @@ const styles = `
   .step-title { font-size: 17px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 8px; }
   .step-desc { font-size: 13px; color: var(--text-muted); line-height: 1.65; }
   .audience-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-top: 40px; }
-  .audience-card { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+  .audience-card { background: var(--surface); border: 1px solid var(--border); border-radius: 18px; padding: 28px; transition: border-color 0.2s; }
+  .audience-card:hover { border-color: var(--border-hover); }
   .audience-role { font-size: 14px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 6px; }
   .audience-role span { color: var(--accent); }
   .audience-desc { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
@@ -602,7 +604,7 @@ const styles = `
   .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: var(--surface); border: 1px solid var(--accent); color: var(--text); padding: 12px 20px; border-radius: var(--radius); font-size: 14px; z-index: 2000; box-shadow: 0 4px 24px rgba(0,0,0,0.4); }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   .fade-up { animation: fadeUp 0.4s ease; }
-  @media (max-width: 860px) { .hero-split { grid-template-columns: 1fr; gap: 36px; } .hero-right { position: static; } .steps { grid-template-columns: 1fr !important; } .step:not(:last-child) { border-right: none; border-bottom: 1px solid var(--border); } }
+  @media (max-width: 860px) { .hero-split { grid-template-columns: 1fr; gap: 36px; }  .steps { grid-template-columns: 1fr !important; } .step:not(:last-child) { border-right: none; border-bottom: 1px solid var(--border); } }
   @media (max-width: 640px) { .page { padding: 0 18px 100px; } .nav-links { display: none; } .theme-toggle { display: none; } .nav-right .btn-primary { display: none; } .mobile-hamburger { display: flex; } .steps { grid-template-columns: 1fr; } .step:not(:last-child) { border-right: none; border-bottom: 1px solid var(--border); } .form-card { padding: 22px 18px; } .form-footer { flex-direction: column; align-items: stretch; } .radio-group { flex-direction: column; } .report-header { flex-direction: column; } .modal-actions { flex-wrap: wrap; } }
   
   /* Mobile table layout - below 768px */
@@ -2089,23 +2091,17 @@ export default function UXRival() {
 
         <main>
           <section className="hero-section">
-            <div className="hero-split">
-              <div className="hero-left">
-                <div className="hero-kicker">AI-powered UX intelligence</div>
-                <h1 className="hero-h1">Know where your<br /><em>competitors</em><br />are failing</h1>
-                <p className="hero-sub">Instant structured teardowns, UX scoring, heatmaps, weekly monitoring and a public API — for any product category. Built for designers and agencies who move fast.</p>
-                <div className="hero-trust">
-                  <span className="trust-item">⚡ Results in ~10s</span><span className="trust-sep">·</span>
+            <div className="hero-center">
+              <div className="hero-kicker">AI-powered competitive intelligence</div>
+              <h1 className="hero-h1">Know your market.<br /><em>Outship everyone.</em></h1>
+              <p className="hero-sub">Instant UX teardowns, PM briefs, radar charts and weekly monitoring for any product — in under 30 seconds.</p>
+              <div className="hero-trust">
                   <span className="trust-item">30+ industries</span><span className="trust-sep">·</span>
-                  <span className="trust-item">UX Scoring</span><span className="trust-sep">·</span>
-                  <span className="trust-item">Heatmap</span><span className="trust-sep">·</span>
-                  <span className="trust-item">Weekly Alerts</span><span className="trust-sep">·</span>
-                  <span className="trust-item">Figma Plugin</span><span className="trust-sep">·</span>
-                  <span className="trust-item">Public API</span><span className="trust-sep">·</span>
-                  <span className="trust-item">Free · No signup</span>
+                  <span className="trust-item">UX + PM modes</span><span className="trust-sep">·</span>
+                  <span className="trust-item">Free to start</span>
                 </div>
-              </div>
-            <div className="hero-right" id="form">
+            </div>
+            <div className="hero-form-wrap" id="form">
               <div className="form-card">
                 <div className="form-row">
                   <div className="view-toggle" style={{ marginBottom: 0 }}>
@@ -2153,7 +2149,6 @@ export default function UXRival() {
                 </div>
               </div>
             </div>
-          </div>
         </section>
 
 
@@ -2242,9 +2237,9 @@ export default function UXRival() {
 
         <div id="learn">
           <section className="section">
-            <div className="section-eyebrow">What you get</div>
-            <div className="section-title">Everything a designer needs to win</div>
-            <p className="section-sub">Stop spending hours on manual competitor audits. UX Rival does it in seconds.</p>
+            <div className="section-eyebrow">Capabilities</div>
+            <div className="section-title">Everything in one report</div>
+            <p className="section-sub">No tabs. No spreadsheets. One analysis gives you scores, heatmaps, a radar chart, pattern recommendations and a market gap — instantly.</p>
             <div className="features-grid">
               {[
                 { icon: "⚡", title: "Instant Teardowns", desc: "Structured UX breakdown of any product category in under 30 seconds." },
@@ -2264,7 +2259,7 @@ export default function UXRival() {
           </section>
           <section className="section">
             <div className="section-eyebrow">How it works</div>
-            <div className="section-title">Three steps to a full UX audit</div>
+            <div className="section-title">Simple by design</div>
             <div className="steps-wrap" style={{ marginTop: 40 }}>
               <div className="steps">
                 {[
@@ -2277,7 +2272,7 @@ export default function UXRival() {
           </section>
           <section className="section">
             <div className="section-eyebrow">Who it&apos;s for</div>
-            <div className="section-title">Built for people who ship products</div>
+            <div className="section-title">One tool. Every role.</div>
             <div className="audience-grid">
               {[
                 { accent: "Product Designers", desc: "Stop spending hours on manual audits. Get structured insights in seconds." },
@@ -2312,7 +2307,7 @@ const data = await res.json();`}</pre>
 
         <footer className="site-footer">
           <div className="footer-logo">UX<span>Rival</span></div>
-          <div className="footer-copy">Built for designers who ship · Powered by Claude</div>
+          <div className="footer-copy">Built for designers, PMs and founders · Powered by Gemini</div>
         </footer>
         </main>
       </div>
