@@ -97,6 +97,13 @@ function buildPMPrompt(category: string, competitorList: string, myProduct?: str
 
 You are a senior product strategist. Analyze the "${category}" space and compare: ${comps.join(", ")}.
 
+CRITICAL ACCURACY RULES:
+- If you have limited knowledge of a product, say so with conservative scores (50-65 range) rather than fabricating details.
+- A minimal honest analysis is far better than a confident inaccurate one.
+- Only make claims you are genuinely confident about.
+- If a product is obscure or regional, score it conservatively and note uncertainty.
+- Never invent features, scores or positioning to fill gaps.
+
 Provide a comprehensive PM intelligence brief covering:
 1. Market positioning and differentiation
 2. Core value proposition per product
@@ -181,7 +188,15 @@ If you cannot find reliable information about a product, score it as Average —
     return `Output ONLY valid JSON. No markdown, no explanation, no extra text.
 
 UX analysis of "${category}". Compare: ${comps.join(", ")}.
-${myProductNote}Ratings: Excellent|Good|Average|Poor|Weak. Keep ALL text values under 7 words.
+${myProductNote}
+CRITICAL ACCURACY RULES:
+- If you have limited or uncertain knowledge of a product, assign Average rating and keep notes generic rather than fabricating specifics.
+- A minimal honest analysis is far better than a confident inaccurate one.
+- Only rate dimensions you are genuinely confident about.
+- If a product is obscure, new or regional with little public information, score conservatively (50-65) and note limited data.
+- Never invent features or UX details to fill gaps.
+
+Ratings: Excellent|Good|Average|Poor|Weak. Keep ALL text values under 7 words.
 "rec" = specific design action for someone building a new product in this space.
 "steal" = real-world example of a product that does this dimension well, max 8 words (e.g. "Duolingo's progress bar after each lesson").
 
@@ -195,6 +210,13 @@ JSON only:`;
   return `Output ONLY valid JSON. No markdown, no explanation, no extra text.
 
 UX analysis of "${category}" category.
+
+CRITICAL ACCURACY RULES:
+- If you have limited knowledge of products in this category, be conservative with scores rather than fabricating details.
+- A minimal honest analysis is far better than a confident inaccurate one.
+- Only make claims you are genuinely confident about.
+- Never invent features or UX details to fill gaps.
+
 Ratings: Excellent|Good|Average|Poor|Weak. Keep ALL text values under 7 words.
 "rec" = one concrete design improvement a new product builder should implement.
 "steal" = real-world example of a product that does this dimension well, max 8 words (e.g. "Stripe's inline error messages on forms").
