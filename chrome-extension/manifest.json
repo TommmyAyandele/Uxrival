@@ -3,7 +3,7 @@
   "name": "UX Rival",
   "version": "1.0.0",
   "description": "Instant AI competitive UX analysis for any product.",
-  "permissions": ["activeTab", "storage", "scripting"],
+  "permissions": ["storage"],
   "host_permissions": ["https://*/*", "http://*/*"],
   "action": {
     "default_title": "Open UX Rival",
@@ -19,6 +19,15 @@
     "32": "icon32.png",
     "48": "icon48.png",
     "128": "icon128.png"
+  },
+  "commands": {
+    "toggle-panel": {
+      "suggested_key": {
+        "default": "Alt+Shift+U",
+        "mac": "Alt+Shift+U"
+      },
+      "description": "Toggle UX Rival panel"
+    }
   },
   "background": {
     "service_worker": "background.js"

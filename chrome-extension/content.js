@@ -76,6 +76,15 @@
     '<div id="uxrival-body">' +
       '<div id="uxr-form">' +
 
+        // Restore banner
+        '<div id="uxr-restore-banner" style="display:none;background:#17171a;border:1px solid #e8ff47;border-radius:10px;padding:12px 14px;margin-bottom:14px;align-items:center;justify-content:space-between;gap:8px">' +
+          '<span style="font-size:11px;color:#a0a0b0">View your last analysis?</span>' +
+          '<div style="display:flex;gap:6px">' +
+            '<button type="button" id="uxr-restore-yes" style="background:#e8ff47;color:#090909;border:none;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer">View</button>' +
+            '<button type="button" id="uxr-restore-no" style="background:none;border:1px solid #212126;border-radius:6px;padding:4px 10px;font-size:11px;color:#66666f;cursor:pointer">Dismiss</button>' +
+          '</div>' +
+        '</div>' +
+
         // Site card
         '<div class="uxr-site-card">' +
           '<div style="font-size:18px">🌐</div>' +
@@ -106,7 +115,7 @@
         '</div>' +
 
         // Other product name — only shows in "another product" mode
-        '<div id="uxr-other-wrap" style="display:none">' +
+        '<div id="uxr-other-wrap" style="display:none!important">' +
           '<span class="uxr-label">Product name</span>' +
           '<input type="text" class="uxr-input" id="uxr-other-name" placeholder="e.g. Bolt, Notion, Kuda" />' +
         '</div>' +
@@ -175,6 +184,7 @@
       '</div>' +
       '<div class="uxr-result-body" id="uxr-result-content"></div>' +
       '<div class="uxr-result-footer">' +
+        '<button type="button" class="uxr-btn-sm" id="uxr-copy-summary">Copy Summary</button>' +
         '<button type="button" class="uxr-btn-sm" id="uxr-copy">Copy JSON</button>' +
         '<button type="button" class="uxr-btn-sm accent" id="uxr-view-full">View Full Report →</button>' +
       '</div>' +
@@ -186,6 +196,19 @@
   if (detectedIndustry) {
     document.getElementById('uxr-industry').value = detectedIndustry;
   }
+
+  // Load last result from storage
+  chrome.storage.local.get(['uxrivalLastResult', 'uxrivalLastCategory'], function(data) {
+    if (data.uxrivalLastResult) {
+      try {
+        currentReportData = JSON.parse(data.uxrivalLastResult);
+        currentCategory = data.uxrivalLastCategory || '';
+        // Show restore banner
+        var restoreBanner = document.getElementById('uxr-restore-banner');
+        if (restoreBanner) restoreBanner.style.setProperty('display', 'flex', 'important');
+      } catch(e) {}
+    }
+  });
 
   // Mode switching
   var modeBtns = ['uxr-mode-page', 'uxr-mode-product', 'uxr-mode-other'];
@@ -239,6 +262,16 @@
   document.getElementById('uxr-analyze').addEventListener('click', analyze);
   document.getElementById('uxr-back').addEventListener('click', showForm);
   document.getElementById('uxr-copy').addEventListener('click', copyJSON);
+  document.getElementById('uxr-copy-summary').addEventListener('click', copySummary);
+  document.getElementById('uxr-restore-yes').addEventListener('click', function() {
+    document.getElementById('uxr-restore-banner').style.setProperty('display', 'none', 'important');
+    showResult(currentReportData);
+  });
+  document.getElementById('uxr-restore-no').addEventListener('click', function() {
+    document.getElementById('uxr-restore-banner').style.setProperty('display', 'none', 'important');
+    currentReportData = null;
+    chrome.storage.local.remove(['uxrivalLastResult', 'uxrivalLastCategory']);
+  });
   document.getElementById('uxr-open-full').addEventListener('click', function() {
     window.open('https://uxrival.xyz', '_blank');
   });
@@ -323,6 +356,15 @@
       if (el) el.textContent = dots[di] + '...';
     }, 2000);
 
+    // 30 second timeout
+    var timeoutId = setTimeout(function() {
+      clearInterval(interval);
+      showForm();
+      var errEl = document.getElementById('uxr-error');
+      errEl.innerHTML = '⏱ Analysis is taking too long. Our AI may be under high demand. <strong>Try again in a moment.</strong>';
+      errEl.style.setProperty('display', 'block', 'important');
+    }, 30000);
+
     fetch('https://uxrival.xyz/api/v1/analyze', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -334,20 +376,28 @@
       })
     })
     .then(function(res) {
+      clearTimeout(timeoutId);
       clearInterval(interval);
-      if (!res.ok) throw new Error('Analysis failed — try again in a moment');
+      if (!res.ok) {
+        if (res.status === 500) throw new Error('Our AI is under high demand right now. Try again in a moment.');
+        if (res.status === 429) throw new Error('Too many requests. Wait a moment and try again.');
+        throw new Error('Analysis failed — try again in a moment.');
+      }
       return res.json();
     })
     .then(function(data) {
       if (data.error) throw new Error(data.error);
       currentReportData = data;
+      // Save to storage for persistence
+      chrome.storage.local.set({ uxrivalLastResult: JSON.stringify(data), uxrivalLastCategory: currentCategory });
       showResult(data);
     })
     .catch(function(err) {
+      clearTimeout(timeoutId);
       clearInterval(interval);
       showForm();
       var errEl = document.getElementById('uxr-error');
-      errEl.textContent = err.message || 'Analysis failed — try again';
+      errEl.innerHTML = '⚠ ' + (err.message || 'Analysis failed. Check your connection and try again.');
       errEl.style.setProperty('display', 'block', 'important');
     });
   }
@@ -429,6 +479,56 @@
   function copyJSON() {
     if (currentReportData) {
       navigator.clipboard.writeText(JSON.stringify(currentReportData, null, 2));
+    }
+  }
+
+  function copySummary() {
+    if (!currentReportData) return;
+    var d = currentReportData;
+    var lines = [];
+    lines.push('UX Rival Analysis — ' + currentCategory);
+    lines.push('');
+    if (d.headline) lines.push(d.headline);
+    lines.push('');
+    if (d.scores) {
+      lines.push('UX SCORES');
+      for (var name in d.scores) {
+        lines.push(name + ': ' + d.scores[name] + '/100');
+      }
+      lines.push('');
+    }
+    if (d.secs) {
+      d.secs.forEach(function(sec) {
+        lines.push(sec.cat.toUpperCase());
+        if (sec.rows) {
+          sec.rows.forEach(function(row) {
+            var ratings = [];
+            if (row.sc) {
+              for (var comp in row.sc) {
+                ratings.push(comp + ': ' + row.sc[comp].r);
+              }
+            }
+            lines.push('  ' + row.dim + ' — ' + ratings.join(', '));
+            if (row.rec) lines.push('  → ' + row.rec);
+          });
+        }
+        lines.push('');
+      });
+    }
+    if (d.opp) {
+      lines.push('MARKET GAP');
+      lines.push(d.opp);
+      lines.push('');
+    }
+    lines.push('Generated by UX Rival — uxrival.xyz');
+    lines.push('⚠ AI-generated. Verify findings with direct product research.');
+    navigator.clipboard.writeText(lines.join('\n'));
+
+    // Show feedback
+    var copyBtn = document.getElementById('uxr-copy-summary');
+    if (copyBtn) {
+      copyBtn.textContent = 'Copied ✓';
+      setTimeout(function() { copyBtn.textContent = 'Copy Summary'; }, 2000);
     }
   }
 
