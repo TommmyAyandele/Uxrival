@@ -192,13 +192,40 @@
 
   document.body.appendChild(panel);
 
+  function safeStorageGet(keys, callback) {
+    try {
+      if (chrome && chrome.storage && chrome.storage.local) {
+        safeStorageGet(keys, callback);
+      } else {
+        callback({});
+      }
+    } catch(e) { callback({}); }
+  }
+
+  function safeStorageSet(data, callback) {
+    try {
+      if (chrome && chrome.storage && chrome.storage.local) {
+        safeStorageSet(data);
+      }
+    } catch(e) {}
+  }
+
+  function safeStorageRemove(keys) {
+    try {
+      if (chrome && chrome.storage && chrome.storage.local) {
+        safeStorageRemove(keys);
+      }
+    } catch(e) {}
+  }
+
+
   // Set detected industry
   if (detectedIndustry) {
     document.getElementById('uxr-industry').value = detectedIndustry;
   }
 
   // Load last result from storage
-  chrome.storage.local.get(['uxrivalLastResult', 'uxrivalLastCategory'], function(data) {
+  safeStorageGet(['uxrivalLastResult', 'uxrivalLastCategory'], function(data) {
     if (data.uxrivalLastResult) {
       try {
         currentReportData = JSON.parse(data.uxrivalLastResult);
@@ -270,7 +297,7 @@
   document.getElementById('uxr-restore-no').addEventListener('click', function() {
     document.getElementById('uxr-restore-banner').style.setProperty('display', 'none', 'important');
     currentReportData = null;
-    chrome.storage.local.remove(['uxrivalLastResult', 'uxrivalLastCategory']);
+    safeStorageRemove(['uxrivalLastResult', 'uxrivalLastCategory']);
   });
   document.getElementById('uxr-open-full').addEventListener('click', function() {
     window.open('https://uxrival.xyz', '_blank');
@@ -284,7 +311,7 @@
 
   document.getElementById('uxr-close').addEventListener('click', function() {
     panel.style.setProperty('display', 'none', 'important');
-    chrome.storage.local.set({ uxrivalOpen: false });
+    safeStorageSet({ uxrivalOpen: false });
   });
 
   // Dragging
@@ -389,7 +416,7 @@
       if (data.error) throw new Error(data.error);
       currentReportData = data;
       // Save to storage for persistence
-      chrome.storage.local.set({ uxrivalLastResult: JSON.stringify(data), uxrivalLastCategory: currentCategory });
+      safeStorageSet({ uxrivalLastResult: JSON.stringify(data), uxrivalLastCategory: currentCategory });
       showResult(data);
     })
     .catch(function(err) {
@@ -537,10 +564,10 @@
       var isHidden = panel.style.getPropertyValue('display') === 'none';
       if (isHidden) {
         panel.style.setProperty('display', 'flex', 'important');
-        chrome.storage.local.set({ uxrivalOpen: true });
+        safeStorageSet({ uxrivalOpen: true });
       } else {
         panel.style.setProperty('display', 'none', 'important');
-        chrome.storage.local.set({ uxrivalOpen: false });
+        safeStorageSet({ uxrivalOpen: false });
       }
     }
   });

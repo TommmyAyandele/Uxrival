@@ -2064,6 +2064,9 @@ export default function UXRival() {
                 <span>free left</span>
               </div>
             )}
+            <a href="https://chromewebstore.google.com/detail/ux-rival/fipmackigigbeppphgpbjjjoimiieeio" target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 8, padding: "8px 14px", fontSize: 12, color: "var(--text-muted)", textDecoration: "none", fontFamily: "var(--font-m)", letterSpacing: "0.04em", whiteSpace: "nowrap" }}>
+              <span>🧩</span> Chrome Extension
+            </a>
             <button type="button" className="btn-primary" onClick={isPro ? scrollToForm : (usageCount >= FREE_LIMIT ? () => setShowPaywall(true) : scrollToForm)}>
               {isPro ? "Run Analysis →" : usageCount >= FREE_LIMIT ? "Upgrade to Pro →" : "Get Started Free →"}
             </button>
@@ -2330,6 +2333,11 @@ const data = await res.json();`}</pre>
         <footer className="site-footer">
           <div className="footer-logo">UX<span>Rival</span></div>
           <div className="footer-copy">Built for designers, PMs and founders · Powered by Gemini</div>
+          <div style={{ marginTop: 10 }}>
+            <a href="https://chromewebstore.google.com/detail/ux-rival/fipmackigigbeppphgpbjjjoimiieeio" target="_blank" rel="noopener noreferrer" style={{ fontSize: 12, color: "var(--text-dim)", textDecoration: "none", fontFamily: "var(--font-m)" }}>
+              🧩 Available on Chrome Web Store
+            </a>
+          </div>
         </footer>
         </main>
       </div>
