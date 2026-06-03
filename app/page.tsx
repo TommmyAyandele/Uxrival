@@ -384,11 +384,12 @@ const styles = `
   .nav-logo { font-size: 16px; font-weight: 800; letter-spacing: -0.03em; }
   .nav-logo span { color: var(--accent); }
   .nav-pill { font-family: var(--font-m); font-size: 9px; color: var(--accent); background: var(--accent-dim); border: 1px solid rgba(232,255,71,0.2); padding: 2px 8px; border-radius: 20px; letter-spacing: 0.1em; }
-  .nav-right { display: flex; align-items: center; gap: 16px; }
-  .nav-icon-btns { display: none; }
-  .nav-free-left { display: none; }
-  .nav-chrome-link { display: none; }
-  .nav-right .btn-primary { display: none; }
+  .nav-right { display: flex; align-items: center; gap: 12px; }
+  .nav-icon-btns { display: none !important; }
+  .nav-free-left { display: none !important; }
+  .nav-chrome-link { display: none !important; }
+  .nav-right .btn-primary { display: none !important; }
+  .nav-links { display: none !important; }
   .nav-links { display: none; }
   .nav-link { font-size: 13px; color: var(--text-muted); cursor: pointer; transition: color 0.15s; }
   .nav-link:hover { color: var(--text); }
