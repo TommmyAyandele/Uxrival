@@ -384,8 +384,12 @@ const styles = `
   .nav-logo { font-size: 16px; font-weight: 800; letter-spacing: -0.03em; }
   .nav-logo span { color: var(--accent); }
   .nav-pill { font-family: var(--font-m); font-size: 9px; color: var(--accent); background: var(--accent-dim); border: 1px solid rgba(232,255,71,0.2); padding: 2px 8px; border-radius: 20px; letter-spacing: 0.1em; }
-  .nav-right { display: flex; align-items: center; gap: 28px; }
-  .nav-links { display: flex; align-items: center; gap: 28px; }
+  .nav-right { display: flex; align-items: center; gap: 16px; }
+  .nav-icon-btns { display: none; }
+  .nav-free-left { display: none; }
+  .nav-chrome-link { display: none; }
+  .nav-right .btn-primary { display: none; }
+  .nav-links { display: none; }
   .nav-link { font-size: 13px; color: var(--text-muted); cursor: pointer; transition: color 0.15s; }
   .nav-link:hover { color: var(--text); }
   
@@ -431,7 +435,7 @@ const styles = `
   }
   
   /* Mobile hamburger menu */
-  .mobile-hamburger { display: none; flex-direction: column; gap: 4px; background: none; border: none; cursor: pointer; padding: 8px; }
+  .mobile-hamburger { display: flex; flex-direction: column; gap: 4px; background: none; border: none; cursor: pointer; padding: 8px; }
   .hamburger-line { width: 20px; height: 2px; background-color: var(--text); transition: all 0.2s ease; }
   
   .mobile-menu-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); z-index: 1000; display: flex; justify-content: flex-end; }
@@ -627,7 +631,7 @@ const styles = `
   @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   .fade-up { animation: fadeUp 0.4s ease; }
   @media (max-width: 860px) { .hero-split { grid-template-columns: 1fr; gap: 36px; }  .steps { grid-template-columns: 1fr !important; } .step:not(:last-child) { border-right: none; border-bottom: 1px solid var(--border); } }
-  @media (max-width: 640px) { .page { padding: 0 18px 100px; } .nav-links { display: none; } .theme-toggle { display: none; } .nav-right .btn-primary { display: none; } .mobile-hamburger { display: flex; } .steps { grid-template-columns: 1fr; } .step:not(:last-child) { border-right: none; border-bottom: 1px solid var(--border); } .form-card { padding: 22px 18px; } .form-footer { flex-direction: column; align-items: stretch; } .radio-group { flex-direction: column; } .report-header { flex-direction: column; } .modal-actions { flex-wrap: wrap; } }
+  @media (max-width: 640px) { .page { padding: 0 18px 100px; } .nav-links { display: none; } .theme-toggle { display: none; } .nav-right .btn-primary { display: none; } .mobile-hamburger { display: flex !important; } .nav-icon-btns { display: none !important; } .nav-free-left { display: none !important; } .nav-chrome-link { display: none !important; } .steps { grid-template-columns: 1fr; } .step:not(:last-child) { border-right: none; border-bottom: 1px solid var(--border); } .form-card { padding: 22px 18px; } .form-footer { flex-direction: column; align-items: stretch; } .radio-group { flex-direction: column; } .report-header { flex-direction: column; } .modal-actions { flex-wrap: wrap; } }
   
   /* Mobile table layout - below 768px */
   @media (min-width: 769px) { .mobile-table-cards { display: none !important; } }
@@ -1951,8 +1955,8 @@ export default function UXRival() {
               <span className="nav-link" onClick={() => window.location.href = "/developers"}>API</span>
             </div>
             
-            {/* History and Watchlist icon buttons */}
-            <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+            {/* History and Watchlist icon buttons - hidden on mobile */}
+            <div className="nav-icon-btns" style={{ display: "flex", gap: "12px", alignItems: "center" }}>
               <div style={{ position: "relative", display: "inline-flex" }}>
                 <button 
                   type="button" 
@@ -2059,12 +2063,12 @@ export default function UXRival() {
             </div>
             
             {!isPro && (
-              <div style={{ fontFamily: "var(--font-m)", fontSize: 11, color: "var(--text-dim)", display: "flex", alignItems: "center", gap: 4 }}>
+              <div className="nav-free-left" style={{ fontFamily: "var(--font-m)", fontSize: 11, color: "var(--text-dim)", display: "flex", alignItems: "center", gap: 4 }}>
                 <span style={{ color: usageCount >= FREE_LIMIT ? "var(--red)" : "var(--accent)", fontWeight: 700 }}>{Math.max(0, FREE_LIMIT - usageCount)}</span>
                 <span>free left</span>
               </div>
             )}
-            <a href="https://chromewebstore.google.com/detail/ux-rival/fipmackigigbeppphgpbjjjoimiieeio" target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 8, padding: "8px 14px", fontSize: 12, color: "var(--text-muted)", textDecoration: "none", fontFamily: "var(--font-m)", letterSpacing: "0.04em", whiteSpace: "nowrap" }}>
+            <a className="nav-chrome-link" href="https://chromewebstore.google.com/detail/ux-rival/fipmackigigbeppphgpbjjjoimiieeio" target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "var(--surface2)", border: "1px solid var(--border)", borderRadius: 8, padding: "8px 14px", fontSize: 12, color: "var(--text-muted)", textDecoration: "none", fontFamily: "var(--font-m)", letterSpacing: "0.04em", whiteSpace: "nowrap" }}>
               <span>🧩</span> Chrome Extension
             </a>
             <button type="button" className="btn-primary" onClick={isPro ? scrollToForm : (usageCount >= FREE_LIMIT ? () => setShowPaywall(true) : scrollToForm)}>
@@ -2102,12 +2106,25 @@ export default function UXRival() {
                 <div className="mobile-menu-item" onClick={() => { setMobileMenuOpen(false); scrollToLearn(); }}>Features</div>
                 <div className="mobile-menu-item" onClick={() => { setMobileMenuOpen(false); scrollToLearn(); }}>How it works</div>
                 <div className="mobile-menu-item" onClick={() => { setMobileMenuOpen(false); scrollToLearn(); }}>Who it&apos;s for</div>
-                <div className="mobile-menu-item" onClick={() => { setMobileMenuOpen(false); setShowWatchlistModal(true); }}>Watchlist{watchlist.length > 0 && <span className="nav-badge">{watchlist.length}</span>}</div>
-                <div className="mobile-menu-item" onClick={() => { setMobileMenuOpen(false); setShowHistoryModal(true); }}>History{history.length > 0 && <span className="nav-badge" style={{ background: "var(--surface2)", color: "var(--text-muted)" }}>{history.length}</span>}</div>
+                <div className="mobile-menu-item" onClick={() => { setMobileMenuOpen(false); setShowWatchlistModal(true); }}>
+                  Watchlist {watchlist.length > 0 && <span style={{ marginLeft: 6, background: "var(--accent)", color: "#090909", fontSize: 10, fontWeight: 700, padding: "1px 6px", borderRadius: 10 }}>{watchlist.length}</span>}
+                </div>
+                <div className="mobile-menu-item" onClick={() => { setMobileMenuOpen(false); setShowHistoryModal(true); }}>
+                  History {history.length > 0 && <span style={{ marginLeft: 6, background: "var(--surface2)", color: "var(--text-muted)", fontSize: 10, fontWeight: 700, padding: "1px 6px", borderRadius: 10, border: "1px solid var(--border)" }}>{history.length}</span>}
+                </div>
                 <div className="mobile-menu-item" onClick={() => { setMobileMenuOpen(false); window.location.href = "/developers"; }}>API</div>
-                
+                <div className="mobile-menu-item" onClick={() => { setMobileMenuOpen(false); window.open("https://chromewebstore.google.com/detail/ux-rival/fipmackigigbeppphgpbjjjoimiieeio", "_blank"); }}>
+                  🧩 Chrome Extension
+                </div>
+                {!isPro && (
+                  <div className="mobile-menu-item" style={{ color: "var(--text-dim)", fontSize: 13 }}>
+                    <span style={{ color: usageCount >= FREE_LIMIT ? "var(--red)" : "var(--accent)", fontWeight: 700, marginRight: 6 }}>{Math.max(0, FREE_LIMIT - usageCount)}</span> free analyses left
+                  </div>
+                )}
                 <div className="mobile-menu-cta">
-                  <button type="button" className="btn-primary" onClick={() => { setMobileMenuOpen(false); scrollToForm(); }}>Get Started Free →</button>
+                  <button type="button" className="btn-primary" style={{ width: "100%" }} onClick={() => { setMobileMenuOpen(false); isPro ? scrollToForm() : usageCount >= FREE_LIMIT ? setShowPaywall(true) : scrollToForm(); }}>
+                    {isPro ? "Run Analysis →" : usageCount >= FREE_LIMIT ? "Upgrade to Pro →" : "Get Started Free →"}
+                  </button>
                 </div>
               </div>
             </div>
