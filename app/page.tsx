@@ -4,7 +4,7 @@ import { useSearchParams } from "next/navigation";
 
 const EMAIL_STORAGE_KEY = "uxrival_email_v3";
 const SURVEY_STORAGE_KEY = "uxrival_survey_done_v3";
-const USAGE_STORAGE_KEY = "uxrival_usage_count_v3";
+const USAGE_STORAGE_KEY = "uxrival_usage_count_v4";
 const PRO_STORAGE_KEY = "uxrival_pro_v3";
 const FREE_LIMIT = 3;
 const WATCHLIST_STORAGE_KEY = "uxrival_watchlist_v3";
